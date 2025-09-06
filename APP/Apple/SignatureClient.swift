@@ -27,14 +27,14 @@ class SignatureClient {
     /// - Throws: 如果签名失败，抛出 SignatureError
     func sign() throws {
         // TODO: 当依赖项可用时实现 IPA 签名
-        print("Signing IPA file: \(filename)")
+        print("Ký tệp IPA: \(filename)")
     }
     /// 将已签名的 IPA 文件保存到新位置
     /// - Parameter outputPath: 已签名的 IPA 文件应保存的路径
     /// - Throws: 如果保存失败，抛出 SignatureError
     func save(to outputPath: String) throws {
         // TODO: 当依赖项可用时实现 IPA 文件保存
-        print("Saving signed IPA to: \(outputPath)")
+        print("Lưu IPA đã ký vào: \(outputPath)")
     }
 }
 /// 签名操作过程中可能发生的错误
@@ -46,13 +46,13 @@ enum SignatureError: Error {
     var localizedDescription: String {
         switch self {
         case .invalidFile(let message):
-            return "Invalid file: \(message)"
+            return "Tệp không hợp lệ: \(message)"
         case .invalidSignature(let message):
-            return "Invalid signature: \(message)"
+            return "Chữ ký không hợp lệ: \(message)"
         case .fileSystemError(let message):
-            return "File system error: \(message)"
+            return "Lỗi hệ thống tệp: \(message)"
         case .signingError(let message):
-            return "Signing error: \(message)"
+            return "Ký lỗi: \(message)"
         }
     }
 }

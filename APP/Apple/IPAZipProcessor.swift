@@ -39,7 +39,7 @@ class IPAZipProcessor {
     ///   - appInfo: 应用信息
     /// - Returns: 处理后的IPA文件路径
     func addMetadataToIPA(at ipaPath: String, appInfo: AppMetadataInfo) async throws -> String {
-        print("🔧 [IPAZipProcessor] 开始处理IPA文件: \(ipaPath)")
+        print("🔧 [IPAZipProcessor] Bắt đầu xử lý các tệp IPA: \(ipaPath)")
         
         // 创建临时工作目录
         let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent("IPAZip_\(UUID().uuidString)")
@@ -53,11 +53,11 @@ class IPAZipProcessor {
         // 尝试使用ZipArchive处理IPA文件
         do {
             let processedIPA = try await processWithZipArchive(ipaPath: ipaPath, appInfo: appInfo, tempDir: tempDir)
-            print("✅ [IPAZipProcessor] 使用ZipArchive成功处理IPA文件")
+            print("✅ [IPAZipProcessor] Các tệp IPA được xử lý thành công bằng cách sử dụng ZipArchive")
             return processedIPA
         } catch {
-            print("⚠️ [IPAZipProcessor] ZipArchive处理失败: \(error)")
-            print("📋 [IPAZipProcessor] 使用备用方案：保存iTunesMetadata.plist到Documents目录")
+            print("⚠️ [IPAZipProcessor] Xử lý ZipArchive không thành công: \(error)")
+            print("📋 [IPAZipProcessor] Sử dụng thay thế: Lưu iTunesMetadata.plist vào thư mục Documents")
             
             // 备用方案：保存iTunesMetadata.plist到Documents目录
             return try saveMetadataToDocuments(appInfo: appInfo)
@@ -68,15 +68,15 @@ class IPAZipProcessor {
     private func processWithZipArchive(ipaPath: String, appInfo: AppMetadataInfo, tempDir: URL) async throws -> String {
         // 解压IPA文件
         let extractedDir = try extractIPA(at: ipaPath, to: tempDir)
-        print("🔧 [IPAZipProcessor] IPA文件解压完成")
+        print("🔧 [IPAZipProcessor] Giải nén tệp IPA đã hoàn thành")
         
         // 添加iTunesMetadata.plist
         try addiTunesMetadata(to: extractedDir, with: appInfo)
-        print("🔧 [IPAZipProcessor] 添加iTunesMetadata.plist完成")
+        print("🔧 [IPAZipProcessor] Thêm iTunesMetadata.plist để hoàn thành")
         
         // 重新打包IPA文件
         let processedIPA = try repackIPA(from: extractedDir, originalPath: ipaPath)
-        print("🔧 [IPAZipProcessor] IPA文件重新打包完成")
+        print("🔧 [IPAZipProcessor] Đóng gói lại tệp IPA được hoàn thành")
         
         return processedIPA
     }
@@ -90,7 +90,7 @@ class IPAZipProcessor {
         #if canImport(ZipArchive)
         let success = SSZipArchive.unzipFile(atPath: ipaPath, toDestination: extractedDir.path)
         guard success else {
-            throw IPAZipError.extractionFailed("IPA解压失败")
+            throw IPAZipError.extractionFailed("Giải nén IPA không thành công")
         }
         #else
         // 如果没有ZipArchive，尝试使用系统命令
@@ -112,11 +112,11 @@ class IPAZipProcessor {
         process.waitUntilExit()
         
         if process.terminationStatus != 0 {
-            throw IPAZipError.extractionFailed("系统命令解压失败，退出码: \(process.terminationStatus)")
+            throw IPAZipError.extractionFailed("Giải nén lệnh hệ thống không thành công, mã thoát: \(process.terminationStatus)")
         }
         #else
         // iOS上无法使用系统命令，抛出错误
-        throw IPAZipError.extractionFailed("iOS上无法使用系统命令解压IPA文件")
+        throw IPAZipError.extractionFailed("Không thể giải nén các tệp IPA bằng cách sử dụng các lệnh hệ thống trên iOS")
         #endif
     }
     
@@ -164,7 +164,7 @@ class IPAZipProcessor {
         )
         
         try plistData.write(to: metadataPath)
-        print("🔧 [IPAZipProcessor] 成功创建iTunesMetadata.plist，大小: \(ByteCountFormatter().string(fromByteCount: Int64(plistData.count)))")
+        print("🔧 [IPAZipProcessor] Tạo thành công iTunesMetadata.plist，Kích cỡ: \(ByteCountFormatter().string(fromByteCount: Int64(plistData.count)))")
     }
     
     /// 重新打包IPA文件
@@ -176,7 +176,7 @@ class IPAZipProcessor {
         #if canImport(ZipArchive)
         let success = SSZipArchive.createZipFile(atPath: processedIPAPath.path, withContentsOfDirectory: extractedDir.path)
         guard success else {
-            throw IPAZipError.packagingFailed("IPA重新打包失败")
+            throw IPAZipError.packagingFailed("Đóng gói lại IPA không thành công")
         }
         #else
         // 如果没有ZipArchive，尝试使用系统命令
@@ -203,11 +203,11 @@ class IPAZipProcessor {
         process.waitUntilExit()
         
         if process.terminationStatus != 0 {
-            throw IPAZipError.packagingFailed("系统命令打包失败，退出码: \(process.terminationStatus)")
+            throw IPAZipError.packagingFailed("Gói lệnh hệ thống không thành công, mã thoát: \(process.terminationStatus)")
         }
         #else
         // iOS上无法使用系统命令，抛出错误
-        throw IPAZipError.packagingFailed("iOS上无法使用系统命令打包IPA文件")
+        throw IPAZipError.packagingFailed("Các tệp IPA không thể được đóng gói bằng cách sử dụng các lệnh hệ thống trên iOS")
         #endif
     }
     
@@ -256,8 +256,8 @@ class IPAZipProcessor {
         let finalMetadataPath = documentsPath.appendingPathComponent("iTunesMetadata_\(appInfo.bundleId).plist")
         try plistData.write(to: finalMetadataPath)
         
-        print("📁 [IPAZipProcessor] 备用方案：iTunesMetadata.plist已保存到: \(finalMetadataPath.path)")
-        print("📋 [IPAZipProcessor] 请手动将此文件添加到IPA文件中")
+        print("📁 [IPAZipProcessor] Kế hoạch thay thế：iTunesMetadata.plist Được lưu vào: \(finalMetadataPath.path)")
+        print("📋 [IPAZipProcessor] Vui lòng thêm tệp này vào tệp IPA theo cách thủ công")
         
         return finalMetadataPath.path
     }
@@ -290,11 +290,11 @@ enum IPAZipError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .extractionFailed(let message):
-            return "IPA解压失败: \(message)"
+            return "Giải nén IPA không thành công: \(message)"
         case .packagingFailed(let message):
-            return "IPA打包失败: \(message)"
+            return "Đóng gói IPA không thành công: \(message)"
         case .libraryNotFound(let message):
-            return "库未找到: \(message)"
+            return "Không tìm thấy thư viện: \(message)"
         }
     }
 }

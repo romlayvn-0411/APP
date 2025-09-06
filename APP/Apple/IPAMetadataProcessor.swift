@@ -41,7 +41,7 @@ class IPAMetadataProcessor {
     ///   - appInfo: 应用信息
     /// - Returns: 处理后的IPA文件路径
     func addMetadataToIPA(at ipaPath: String, appInfo: MetadataInfo) async throws -> String {
-        print("🔧 [IPAMetadataProcessor] 开始处理IPA文件: \(ipaPath)")
+        print("🔧 [IPAMetadataProcessor] Bắt đầu xử lý các tệp IPA: \(ipaPath)")
         
         // 创建临时工作目录
         let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent("IPAMetadata_\(UUID().uuidString)")
@@ -54,15 +54,15 @@ class IPAMetadataProcessor {
         
         // 解压IPA文件
         let extractedDir = try extractIPA(at: ipaPath)
-        print("🔧 [IPAMetadataProcessor] IPA文件解压完成")
+        print("🔧 [IPAMetadataProcessor] Giải nén tệp IPA đã hoàn thành")
         
         // 添加iTunesMetadata.plist
         try addiTunesMetadata(to: extractedDir, with: appInfo)
-        print("🔧 [IPAMetadataProcessor] 添加iTunesMetadata.plist完成")
+        print("🔧 [IPAMetadataProcessor] Thêm vào iTunesMetadata.plist Hoàn thành")
         
         // 重新打包IPA文件
         let processedIPA = try repackIPA(from: extractedDir, originalPath: ipaPath)
-        print("🔧 [IPAMetadataProcessor] IPA文件重新打包完成")
+        print("🔧 [IPAMetadataProcessor] Đóng gói lại tệp IPA được hoàn thành")
         
         return processedIPA
     }
@@ -73,7 +73,7 @@ class IPAMetadataProcessor {
     ///   - appInfo: 应用信息
     /// - Returns: 处理后的IPA文件路径
     func addMetadataToIPASimple(at ipaPath: String, appInfo: MetadataInfo) async throws -> String {
-        print("🔧 [IPAMetadataProcessor] 开始简化处理IPA文件: \(ipaPath)")
+        print("🔧 [IPAMetadataProcessor] Bắt đầu đơn giản hóa việc xử lý các tệp IPA: \(ipaPath)")
         
         // 创建iTunesMetadata.plist内容
         let metadataDict: [String: Any] = [
@@ -127,12 +127,12 @@ class IPAMetadataProcessor {
         let metadataPath = tempDir.appendingPathComponent("iTunesMetadata.plist")
         try plistData.write(to: metadataPath)
         
-        print("🔧 [IPAMetadataProcessor] 成功创建iTunesMetadata.plist，大小: \(ByteCountFormatter().string(fromByteCount: Int64(plistData.count)))")
+        print("🔧 [IPAMetadataProcessor] Tạo thành công iTunesMetadata.plist，Kích cỡ: \(ByteCountFormatter().string(fromByteCount: Int64(plistData.count)))")
         
         // 由于iOS上无法直接操作IPA文件内容，返回原文件路径
         // 并提示用户手动添加iTunesMetadata.plist
-        print("⚠️ [IPAMetadataProcessor] iOS限制：无法直接修改IPA文件")
-        print("📋 [IPAMetadataProcessor] 请手动将iTunesMetadata.plist添加到IPA文件中")
+        print("⚠️ [IPAMetadataProcessor] Hạn chế iOS: Các tệp IPA không thể được sửa đổi trực tiếp")
+        print("📋 [IPAMetadataProcessor] Vui lòng thêm thủ công iTunesMetadata.plist vào tệp IPA của bạn")
         print("📁 [IPAMetadataProcessor] iTunesMetadata.plist位置: \(metadataPath.path)")
         
         return ipaPath
@@ -155,12 +155,12 @@ class IPAMetadataProcessor {
         #if canImport(ZipArchive)
         let success = SSZipArchive.unzipFile(atPath: ipaPath, toDestination: extractedDir.path)
         guard success else {
-            throw IPAMetadataError.extractionFailed("ZipArchive解压失败")
+            throw IPAMetadataError.extractionFailed("ZipArchive không thể giải nén")
         }
-        print("🔧 [IPAMetadataProcessor] 使用ZipArchive成功解压IPA文件")
+        print("🔧 [IPAMetadataProcessor] Đã giải nén thành công các tệp IPA bằng cách sử dụng ZipArchive")
         #else
         // 如果没有ZipArchive，抛出错误
-        throw IPAMetadataError.extractionFailed("ZipArchive库未找到，请正确配置依赖")
+        throw IPAMetadataError.extractionFailed("Không tìm thấy thư viện ZipArchive, vui lòng định cấu hình chính xác các phụ thuộc")
         #endif
         
         return extractedDir
@@ -210,7 +210,7 @@ class IPAMetadataProcessor {
         )
         
         try plistData.write(to: metadataPath)
-        print("🔧 [IPAMetadataProcessor] 成功创建iTunesMetadata.plist，大小: \(ByteCountFormatter().string(fromByteCount: Int64(plistData.count)))")
+        print("🔧 [IPAMetadataProcessor] Tạo thành công iTunesMetadata.plist，Kích cỡ: \(ByteCountFormatter().string(fromByteCount: Int64(plistData.count)))")
     }
     
     /// 重新打包IPA文件
@@ -222,12 +222,12 @@ class IPAMetadataProcessor {
         #if canImport(ZipArchive)
         let success = SSZipArchive.createZipFile(atPath: processedIPAPath.path, withContentsOfDirectory: extractedDir.path)
         guard success else {
-            throw IPAMetadataError.packagingFailed("ZipArchive重新打包失败")
+            throw IPAMetadataError.packagingFailed("ZipArchive đóng gói lại không thành công")
         }
-        print("🔧 [IPAMetadataProcessor] 使用ZipArchive成功重新打包IPA文件")
+        print("🔧 [IPAMetadataProcessor] Đóng gói lại thành công các tệp IPA bằng cách sử dụng ZipArchive")
         #else
         // 如果没有ZipArchive，抛出错误
-        throw IPAMetadataError.packagingFailed("ZipArchive库未找到，请正确配置依赖")
+        throw IPAMetadataError.packagingFailed("Không tìm thấy thư viện ZipArchive, vui lòng định cấu hình chính xác các phụ thuộc")
         #endif
         
         // 替换原文件
@@ -243,12 +243,12 @@ class IPAMetadataProcessor {
         #if canImport(ZipArchive)
         let success = SSZipArchive.createZipFile(atPath: outputPath.path, withContentsOfDirectory: extractedDir.path)
         guard success else {
-            throw IPAMetadataError.packagingFailed("ZipArchive重新打包失败")
+            throw IPAMetadataError.packagingFailed("ZipArchive đóng gói lại không thành công")
         }
-        print("🔧 [IPAMetadataProcessor] 使用ZipArchive成功重新打包IPA文件")
+        print("🔧 [IPAMetadataProcessor] Đóng gói lại thành công các tệp IPA bằng cách sử dụng ZipArchive")
         #else
         // 如果没有ZipArchive，抛出错误
-        throw IPAMetadataError.packagingFailed("ZipArchive库未找到，请正确配置依赖")
+        throw IPAMetadataError.packagingFailed("Không tìm thấy thư viện ZipArchive, vui lòng định cấu hình chính xác các phụ thuộc")
         #endif
     }
 }
@@ -262,11 +262,11 @@ enum IPAMetadataError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .extractionFailed(let message):
-            return "IPA解压失败: \(message)"
+            return "Giải nén IPA không thành công: \(message)"
         case .packagingFailed(let message):
-            return "IPA打包失败: \(message)"
+            return "Đóng gói IPA không thành công: \(message)"
         case .metadataCreationFailed(let message):
-            return "元数据创建失败: \(message)"
+            return "Tạo Metadata thất bại: \(message)"
         }
     }
 }

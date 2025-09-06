@@ -199,6 +199,7 @@ enum Storefront: String, CaseIterable {
         case .BA: return "Bosnia and Herzegovina"
         case .ME: return "Montenegro"
         case .XK: return "Kosovo"
+        case .VN: return "Việt Nam"
         default: return self.rawValue
         }
     }

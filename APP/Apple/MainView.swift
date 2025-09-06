@@ -61,16 +61,16 @@ struct MainView: View {
         .onAppear {
             // 首次进入时的初始化
             if !isInitialized {
-                print("[MainView] 首次初始化 - 真机适配开始")
+                print("[MainView] Khởi tạo đầu tiên - Điều chỉnh máy thực bắt đầu")
                 
                 // 真机适配：使用固定延迟确保系统UI完全加载
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     isInitialized = true
-                    print("[MainView] 真机适配初始化完成")
+                    print("[MainView] Khởi tạo thích ứng máy thực được hoàn thành")
                     
                     // 强制刷新所有子视图
                     DispatchQueue.main.async {
-                        print("[MainView] 强制刷新所有子视图")
+                        print("[MainView] Buộc làm mới tất cả các mục tiêu phụ")
                         // 使用简单的状态更新触发刷新
                         selectedTab = selectedTab
                     }
@@ -79,7 +79,7 @@ struct MainView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
             // APP从后台恢复时的处理
-            print("[MainView] APP从后台恢复 - 强制刷新")
+            print("[MainView] Phục hồi ứng dụng từ nền - Force Refresh")
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 // 使用简单的状态更新触发刷新
                 selectedTab = selectedTab
@@ -98,9 +98,9 @@ struct ModernSegmentedTabBar: View {
     @EnvironmentObject var themeManager: ThemeManager
     
     private let tabItems = [
-        (title: "账户", icon: "person.crop.circle.fill", color: Color.blue),
-        (title: "搜索", icon: "magnifyingglass", color: Color.green),
-        (title: "管理", icon: "arrow.down.circle.fill", color: Color.orange)
+        (title: "Tài khoản", icon: "person.crop.circle.fill", color: Color.blue),
+        (title: "Tìm kiếm", icon: "magnifyingglass", color: Color.green),
+        (title: "Quản lý", icon: "arrow.down.circle.fill", color: Color.orange)
     ]
     
     var body: some View {

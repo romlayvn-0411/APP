@@ -21,27 +21,27 @@ enum SearchError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .networkError(let error):
-            return "网络错误: \(error.localizedDescription)"
+            return "Lỗi mạng: \(error.localizedDescription)"
         case .invalidResponse:
-            return "无效的API响应"
+            return "Phản hồi API không hợp lệ"
         case .noResults:
-            return "未找到相关应用"
+            return "Không tìm thấy ứng dụng liên quan"
         case .invalidAppIdentifier:
-            return "无效的应用标识符"
+            return "Định danh ứng dụng không hợp lệ"
         case .rateLimited:
-            return "请求频率过高，请稍后重试"
+            return "Tần suất yêu cầu quá cao, vui lòng thử lại sau"
         case .emptyQuery:
-            return "搜索词不能为空"
+            return "Thuật ngữ tìm kiếm không thể trống"
         case .invalidLimit:
-            return "搜索结果数量限制无效（1-200）"
+            return "Số lượng kết quả tìm kiếm không hợp lệ（1-200）"
         case .invalidBundleId:
-            return "无效的应用包标识符"
+            return "Định danh gói ứng dụng không hợp lệ"
         case .invalidTrackId:
-            return "无效的Track ID"
+            return "Track ID không hợp lệ"
         case .missingIdentifier:
-            return "缺少应用标识符或Track ID"
+            return "Thiếu định danh ứng dụng hoặc Track ID"
         case .appNotFound:
-            return "未找到指定的应用"
+            return "Ứng dụng được chỉ định không được tìm thấy"
         }
     }
 }

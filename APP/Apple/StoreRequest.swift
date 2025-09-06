@@ -53,25 +53,25 @@ class StoreRequest {
         password: String,
         mfa: String? = nil
     ) async throws -> StoreAuthResponse {
-        print("🚀 [认证开始] 开始Apple ID认证流程")
-        print("📧 [认证参数] Apple ID: \(email)")
-        print("🔐 [认证参数] 密码长度: \(password.count) 字符")
-        print("📱 [认证参数] 双重认证码: \(mfa != nil ? "已提供(\(mfa!.count)位)" : "未提供")")
+        print("🚀 [Chứng nhận bắt đầu] Bắt đầu quá trình xác thực ID Apple")
+        print("📧 [Tham số xác thực] Apple ID: \(email)")
+        print("🔐 [Tham số xác thực] Độ dài mật khẩu: \(password.count) ký tự")
+        print("📱 [Tham số xác thực] Mã xác thực nhân tố kép: \(mfa != nil ? "Cung cấp(\(mfa!.count)bit)" : "Không được cung cấp")")
         let guid = getGUID()
-        print("🆔 [设备信息] 生成的GUID: \(guid)")
+        print("🆔 [Thông tin thiết bị] Tạo ra GUID: \(guid)")
         let url = URL(string: "https://auth.itunes.apple.com/auth/v1/native/fast?guid=\(guid)")!
-        print("🌐 [请求URL] \(url.absoluteString)")
+        print("🌐 [Yêu cầu URL] \(url.absoluteString)")
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/x-apple-plist", forHTTPHeaderField: "Content-Type")
         request.setValue(getUserAgent(), forHTTPHeaderField: "User-Agent")
-        print("📋 [请求头] Content-Type: application/x-apple-plist")
-        print("📋 [请求头] User-Agent: \(getUserAgent())")
+        print("📋 [Yêu cầu tiêu đề] Content-Type: application/x-apple-plist")
+        print("📋 [Yêu cầu tiêu đề] User-Agent: \(getUserAgent())")
         // 修复认证参数构建
         let attempt = mfa != nil ? 2 : 4
         let passwordWithMFA = password + (mfa ?? "")
-        print("🔢 [认证参数] attempt: \(attempt)")
-        print("🔐 [认证参数] 合并后密码长度: \(passwordWithMFA.count) 字符")
+        print("🔢 [Tham số xác thực] attempt: \(attempt)")
+        print("🔐 [Tham số xác thực] Độ dài mật khẩu sau khi hợp nhất: \(passwordWithMFA.count) ký tự")
         let bodyDict: [String: Any] = [
             "appleId": email,
             "attempt": attempt,
@@ -81,57 +81,57 @@ class StoreRequest {
             "rmp": "0",
             "why": "signIn"
         ]
-        print("📦 [请求体] 构建认证参数: \(bodyDict.keys.sorted())")
+        print("📦 [Request body] Xây dựng các tham số xác thực: \(bodyDict.keys.sorted())")
         let plistData = try PropertyListSerialization.data(
             fromPropertyList: bodyDict,
             format: .xml,
             options: 0
         )
         request.httpBody = plistData
-        print("📤 [发送请求] 请求体大小: \(plistData.count) 字节")
-        print("⏳ [网络请求] 正在发送认证请求到Apple服务器...")
+        print("📤 [Gửi một yêu cầu] Kích thước Request body: \(plistData.count) Byte")
+        print("⏳ [Yêu cầu mạng] Gửi yêu cầu xác thực đến máy chủ Apple ...")
         let (data, response) = try await session.data(for: request)
-        print("📥 [响应接收] 收到服务器响应，数据大小: \(data.count) 字节")
+        print("📥 [Phản hồi nhận] Đã nhận được phản hồi của máy chủ, kích thước dữ liệu: \(data.count) Byte")
         guard let httpResponse = response as? HTTPURLResponse else {
-            print("❌ [网络错误] 无法获取HTTP响应")
+            print("❌ [Lỗi mạng] Không thể nhận được phản hồi HTTP")
             throw StoreError.invalidResponse
         }
-        print("📊 [响应状态] HTTP状态码: \(httpResponse.statusCode)")
-        print("📋 [响应头] 所有响应头: \(httpResponse.allHeaderFields)")
+        print("📊 [Trạng thái phản hồi] Mã trạng thái HTTP: \(httpResponse.statusCode)")
+        print("📋 [Tiêu đề phản hồi] Tất cả các tiêu đề phản hồi: \(httpResponse.allHeaderFields)")
         let plist = try PropertyListSerialization.propertyList(
             from: data,
             options: [],
             format: nil
         ) as? [String: Any] ?? [:]
-        print("📄 [响应解析] 成功解析plist格式响应")
-        print("🔍 [响应内容] 响应包含的所有键: \(Array(plist.keys).sorted())")
-        print("📝 [响应详情] 完整响应内容: \(plist)")
+        print("📄 [Phân tích phản hồi] Phân tích thành công phản hồi ở định dạng plist")
+        print("🔍 [Nội dung phản hồi] Tất cả các khóa có trong phản hồi: \(Array(plist.keys).sorted())")
+        print("📝 [Chi tiết phản hồi] Hoàn thành nội dung phản hồi: \(plist)")
         // 检查根级别的dsPersonId
         let possibleRootKeys = ["dsPersonId", "dsPersonID", "dsid", "DSID", "directoryServicesIdentifier"]
         for key in possibleRootKeys {
             if let value = plist[key] {
-                print("✅ [DSID检查] 在根级别找到键 '\(key)': \(value)")
+                print("✅ [Kiểm tra DSID] Tìm khóa ở cấp độ gốc '\(key)': \(value)")
             }
         }
         // 增强2FA错误检测
         if let customerMessage = plist["customerMessage"] as? String {
-            print("💬 [服务器消息] customerMessage: \(customerMessage)")
+            print("💬 [Tin nhắn máy chủ] customerMessage: \(customerMessage)")
             if customerMessage == "MZFinance.BadLogin.Configurator_message" ||
                customerMessage.contains("verification code is required") {
-                print("🔐 [双重认证] 检测到需要双重认证码")
+                print("🔐 [Xác thực nhân tố kép] Mã xác thực hai yếu tố được phát hiện")
                 throw StoreError.codeRequired
             }
         }
         // 检查错误信息
         if let failureType = plist["failureType"] as? String {
-            print("❌ [认证失败] failureType: \(failureType)")
+            print("❌ [Xác thực thất bại] failureType: \(failureType)")
         }
         if let errorMessage = plist["errorMessage"] as? String {
-            print("❌ [错误消息] errorMessage: \(errorMessage)")
+            print("❌ [Thông báo lỗi] errorMessage: \(errorMessage)")
         }
-        print("🔄 [解析响应] 开始解析认证响应...")
+        print("🔄 [Phản hồi độ phân giải] Bắt đầu phân tích phản hồi xác thực ...")
         let result = try parseAuthResponse(plist: plist, httpResponse: httpResponse)
-        print("✅ [认证完成] 认证流程处理完毕")
+        print("✅ [Chứng nhận được hoàn thành] Quá trình chứng nhận được hoàn thành")
         return result
     }
     /// Download app information
@@ -293,23 +293,23 @@ class StoreRequest {
         plist: [String: Any],
         httpResponse: HTTPURLResponse
     ) throws -> StoreAuthResponse {
-        print("🔍 [解析开始] parseAuthResponse - 状态码: \(httpResponse.statusCode)")
+        print("🔍 [Độ phân giải bắt đầu] parseAuthResponse - Mã trạng thái: \(httpResponse.statusCode)")
         if httpResponse.statusCode == 200 {
-            print("✅ [状态检查] HTTP 200 - 认证请求成功")
+            print("✅ [Kiểm tra trạng thái] HTTP 200 - Yêu cầu xác thực thành công")
             // 检查所有可能的dsPersonId键名变体
             let possibleKeys = ["dsPersonId", "dsPersonID", "dsid", "DSID", "directoryServicesIdentifier"]
-            print("🔍 [DSID搜索] 在根级别搜索可能的DSID键名: \(possibleKeys)")
+            print("🔍 [Tìm kiếm DSID] Tìm kiếm tên khóa DSID có thể có ở cấp độ gốc: \(possibleKeys)")
             for key in possibleKeys {
                 if let value = plist[key] {
-                    print("🔍 [DEBUG] 找到键 '\(key)': \(value)")
+                    print("🔍 [DEBUG] Tìm chìa khóa '\(key)': \(value)")
                 }
             }
-            print("📋 [账户信息] 开始解析accountInfo...")
+            print("📋 [Thông tin tài khoản] Bắt đầu phân tích accountInfo...")
             let accountInfo = parseAccountInfo(from: plist)
-            print("🔐 [令牌解析] 搜索passwordToken...")
+            print("🔐 [Phân tích mã thông báo] Tìm kiếm passwordToken...")
             let passwordToken = plist["passwordToken"] as? String ?? ""
-            print("🔐 [令牌结果] passwordToken: '\(passwordToken.isEmpty ? "空" : "已获取(\(passwordToken.count)字符)")")
-            print("🆔 [DSID解析] 在根级别搜索dsPersonId...")
+            print("🔐 [Kết quả mã thông báo] passwordToken: '\(passwordToken.isEmpty ? "vô giá trị" : "Nhận(\(passwordToken.count)ký tự)")")
+            print("🆔 [Phân tích cú pháp DSID] Tìm kiếm dsPersonID ở cấp độ gốc ...")
             // 尝试多种可能的键名
             let dsPersonId = (plist["dsPersonId"] as? String) ?? 
                            (plist["dsPersonID"] as? String) ?? 

@@ -127,7 +127,7 @@ extension iTunesSearchResult {
     /// 获取格式化后的价格字符串
     var displayPrice: String {
         if isFree {
-            return "免费"
+            return "Miễn phí"
         } else {
             return formattedPrice ?? "\(price ?? 0.0)"
         }

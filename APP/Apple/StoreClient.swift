@@ -97,21 +97,21 @@ class StoreClient {
         country: String = "US",
         deviceType: String = "iPhone"
     ) async -> Result<[ExtendedSearchResult], Error> {
-        return .failure(NSError(domain: "StoreAPI", code: 1, userInfo: [NSLocalizedDescriptionKey: "真正的Apple Store API搜索尚未实现"]))
+        return .failure(NSError(domain: "StoreAPI", code: 1, userInfo: [NSLocalizedDescriptionKey: "Tìm kiếm API Apple Store Real vẫn chưa được triển khai"]))
     }
     func lookupApp(
         bundleId: String,
         country: String = "US",
         deviceType: String = "iPhone"
     ) async -> Result<ExtendedSearchResult?, Error> {
-        return .failure(NSError(domain: "StoreAPI", code: 1, userInfo: [NSLocalizedDescriptionKey: "真正的Apple Store API查找尚未实现"]))
+        return .failure(NSError(domain: "StoreAPI", code: 1, userInfo: [NSLocalizedDescriptionKey: "Tra cứu API Apple Store thực sự vẫn chưa được triển khai"]))
     }
     func getTrackId(
         bundleIdentifier: String,
         countryCode: String = "US",
         deviceFamily: String = "phone"
     ) async throws -> Int? {
-        throw NSError(domain: "StoreAPI", code: 1, userInfo: [NSLocalizedDescriptionKey: "真正的Apple Store API获取曲目ID尚未实现"])
+        throw NSError(domain: "StoreAPI", code: 1, userInfo: [NSLocalizedDescriptionKey: "API Apple Store thực sự để lấy ID theo dõi vẫn chưa được triển khai"])
     }
 }
 // SignatureClient 定义在 SignatureClient.swift 中以避免重复
@@ -128,14 +128,14 @@ class StoreClient {
     /// 执行真正的签名逻辑
     private func performRealSigning() throws {
         // 暂时抛出错误，表示需要实现真正的签名逻辑
-        throw NSError(domain: "SignatureError", code: 1, userInfo: [NSLocalizedDescriptionKey: "真正的签名逻辑尚未实现"])
+        throw NSError(domain: "SignatureError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Logic chữ ký thực tế vẫn chưa được triển khai"])
     }
     
     /// 执行真正的保存逻辑
     private func performRealSaving(to path: String) throws {
         // 这里应该调用真正的保存服务
         // 暂时抛出错误，表示需要实现真正的保存逻辑
-        throw NSError(domain: "SaveError", code: 1, userInfo: [NSLocalizedDescriptionKey: "真正的保存逻辑尚未实现"])
+        throw NSError(domain: "SaveError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Logic lưu thực tế vẫn chưa được triển khai"])
     }
 // MARK: - 商店响应模型（从 StoreAPI.swift 移动过来）
 struct LocalStoreAuthResponse: Codable {
@@ -212,7 +212,7 @@ struct AppVersion: Codable, Identifiable {
         self.isCurrent = isCurrent
     }
     var displayName: String {
-        return isCurrent ? "\(versionString) (当前版本)" : versionString
+        return isCurrent ? "\(versionString) (Phiên bản hiện tại)" : versionString
     }
 }
 // MARK: - 下载进度信息
@@ -270,10 +270,10 @@ extension StoreClient {
         do {
             // 优先尝试使用第三方 API 获取版本信息
             if let thirdPartyVersions = try await fetchVersionsFromThirdPartyAPI(appId: trackId) {
-                print("[DEBUG] Successfully fetched versions from third-party API: \(thirdPartyVersions.count) versions")
+                print("[DEBUG] Các phiên bản được lấy thành công từ API của bên thứ ba: \(thirdPartyVersions.count) phiên bản")
                 return .success(thirdPartyVersions)
             }
-            print("[DEBUG] Third-party API failed or returned no data, falling back to Apple official API")
+            print("[DEBUG] API của bên thứ ba không thành công hoặc không trả về dữ liệu, chuyển sang API chính thức của Apple")
             // 如果第三方 API 失败，回退到 Apple 官方 API
             // 首先获取当前版本信息
             let result = try await StoreRequest.shared.download(
@@ -297,9 +297,9 @@ extension StoreClient {
             versions.append(currentVersion)
             // 如果有历史版本则添加
             if let historicalVersionIds = item.metadata.softwareVersionExternalIdentifiers {
-                print("[DEBUG] Found \(historicalVersionIds.count) historical version IDs")
-                print("[DEBUG] Current version ID: \(item.metadata.softwareVersionExternalIdentifier)")
-                print("[DEBUG] First 10 historical IDs: \(Array(historicalVersionIds.prefix(10)))")
+                print("[DEBUG] Tìm thấy \(historicalVersionIds.count) ID phiên bản lịch sử")
+                print("[DEBUG] ID phiên bản hiện tại: \(item.metadata.softwareVersionExternalIdentifier)")
+                print("[DEBUG] 10 ID lịch sử đầu tiên: \(Array(historicalVersionIds.prefix(10)))")
                 // 为历史版本创建 AppVersion 对象
                 // 注意：我们只有历史版本的 ID，没有版本字符串
                 // 我们将反转数组，以便先显示较新的版本（不包括当前版本）
@@ -310,28 +310,28 @@ extension StoreClient {
                     // 跳过当前版本（已经添加）
                     if versionIdString != item.metadata.softwareVersionExternalIdentifier {
                         let historicalVersion = AppVersion(
-                            versionString: "历史版本 \(versionCounter)",
+                            versionString: "Phiên bản lịch sử \(versionCounter)",
                             versionId: versionIdString,
                             isCurrent: false
                         )
                         versions.append(historicalVersion)
-                        print("[DEBUG] Added historical version: \(versionCounter), ID: \(versionIdString)")
+                        print("[DEBUG] Đã thêm phiên bản lịch sử: \(versionCounter), ID: \(versionIdString)")
                         versionCounter += 1
                         // 限制版本数量，避免 UI 杂乱
                         if versionCounter > 20 {
-                            print("[DEBUG] Reached version limit, stopping at \(versionCounter-1) versions")
+                            print("[DEBUG] Đạt đến giới hạn phiên bản, dừng lại ở phiên bản \(versionCounter-1)")
                             break
                         }
                     }
                 }
-                print("[DEBUG] Successfully processed \(versionCounter-1) historical versions")
+                print("[DEBUG] Xử lý thành công \(versionCounter-1) phiên bản lịch sử")
             } else {
-                print("[DEBUG] No historical version IDs found in metadata")
+                print("[DEBUG] Không có ID phiên bản lịch sử nào được tìm thấy trong metadata")
             }
-            print("[DEBUG] Total versions found: \(versions.count)")
+            print("[DEBUG] Tổng số phiên bản được tìm thấy: \(versions.count)")
             return .success(versions)
         } catch {
-            print("[DEBUG] Error in getAppVersions: \(error)")
+            print("[DEBUG] Lỗi trong getAppversions: \(error)")
             return .failure(.genericError)
         }
     }
@@ -339,7 +339,7 @@ extension StoreClient {
     private func fetchVersionsFromThirdPartyAPI(appId: String) async throws -> [AppVersion]? {
         let apiUrl = "https://api.timbrd.com/apple/app-version/index.php?id=\(appId)"
         guard let url = URL(string: apiUrl) else {
-            print("[DEBUG] Invalid third-party API URL")
+            print("[DEBUG] URL API của bên thứ ba không hợp lệ")
             return nil
         }
         do {
@@ -347,14 +347,14 @@ extension StoreClient {
             let request = URLRequest(url: url, timeoutInterval: 10.0)
             let (data, response) = try await URLSession.shared.data(for: request)
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                print("[DEBUG] Third-party API returned non-200 status code")
+                print("[DEBUG] API của bên thứ ba đã trả về mã trạng thái không phải là 200")
                 return nil
             }
             // 解析 JSON 响应
             let decoder = JSONDecoder()
             let versionData = try decoder.decode([AppVersionInfo].self, from: data)
             if versionData.isEmpty {
-                print("[DEBUG] Third-party API returned empty version list")
+                print("[DEBUG] API của bên thứ ba đã trả về danh sách phiên bản trống")
                 return nil
             }
             // 转换为 AppVersion 对象，按照版本发布时间倒序排序（最新的版本在前）
@@ -376,7 +376,7 @@ extension StoreClient {
             }
             return versions
         } catch {    
-            print("[DEBUG] Error fetching from third-party API: \(error)")
+            print("[DEBUG] Lỗi tìm nạp từ API của bên thứ ba: \(error)")
             return nil
         }
     }
@@ -513,7 +513,7 @@ extension StoreClient {
     // MARK: - IPA文件处理
     /// 处理下载的IPA文件，添加必要的元数据和签名信息
     private func processDownloadedIPA(at ipaPath: String, with storeItem: StoreItem) async throws {
-        print("🔧 [StoreClient] 开始处理IPA文件: \(ipaPath)")
+        print("🔧 [StoreClient] Bắt đầu xử lý các tệp IPA: \(ipaPath)")
         
         // 创建临时工作目录
         let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent("IPAProcessing_\(UUID().uuidString)")
@@ -526,15 +526,15 @@ extension StoreClient {
         
         // 解压IPA文件
         let extractedDir = try extractIPA(at: URL(fileURLWithPath: ipaPath), to: tempDir)
-        print("🔧 [StoreClient] IPA文件解压完成")
+        print("🔧 [StoreClient] Giải nén tệp IPA đã hoàn thành")
         
         // 添加iTunesMetadata.plist
         try addiTunesMetadata(to: extractedDir, with: storeItem)
-        print("🔧 [StoreClient] 添加iTunesMetadata.plist完成")
+        print("🔧 [StoreClient] Thêm iTunesMetadata.plist để hoàn thành")
         
         // 重新打包IPA文件
         try repackIPA(from: extractedDir, to: ipaPath)
-        print("🔧 [StoreClient] IPA文件重新打包完成")
+        print("🔧 [StoreClient] Đóng gói lại tệp IPA được hoàn thành")
     }
     
     /// 解压IPA文件
@@ -552,19 +552,19 @@ extension StoreClient {
         process.waitUntilExit()
         
         if process.terminationStatus != 0 {
-            throw NSError(domain: "IPAProcessing", code: 1, userInfo: [NSLocalizedDescriptionKey: "IPA解压失败，退出码: \(process.terminationStatus)"])
+            throw NSError(domain: "IPAProcessing", code: 1, userInfo: [NSLocalizedDescriptionKey: "Giải nén IPA không thành công, mã thoát: \(process.terminationStatus)"])
         }
         #else
         // iOS上使用ZipArchive解压
         #if canImport(ZipArchive)
         let success = SSZipArchive.unzipFile(atPath: ipaPath.path, toDestination: extractedDir.path)
         guard success else {
-            throw NSError(domain: "IPAProcessing", code: 1, userInfo: [NSLocalizedDescriptionKey: "ZipArchive解压失败"])
+            throw NSError(domain: "IPAProcessing", code: 1, userInfo: [NSLocalizedDescriptionKey: "ZipArchive không thể giải nén"])
         }
-        print("🔧 [StoreClient] 使用ZipArchive成功解压IPA文件")
+        print("🔧 [StoreClient] Đã giải nén thành công các tệp IPA bằng cách sử dụng ZipArchive")
         #else
         // 如果没有ZipArchive，抛出错误
-        throw NSError(domain: "IPAProcessing", code: 1, userInfo: [NSLocalizedDescriptionKey: "ZipArchive库未找到，请正确配置依赖"])
+        throw NSError(domain: "IPAProcessing", code: 1, userInfo: [NSLocalizedDescriptionKey: "Không tìm thấy thư viện ZipArchive, vui lòng định cấu hình chính xác sự phụ thuộc"])
         #endif
         #endif
         
@@ -615,7 +615,7 @@ extension StoreClient {
         )
         
         try plistData.write(to: metadataPath)
-        print("🔧 [StoreClient] 成功创建iTunesMetadata.plist")
+        print("🔧 [StoreClient] Tạo thành công iTunesMetadata.plist")
     }
     
     /// 重新打包IPA文件
@@ -627,12 +627,12 @@ extension StoreClient {
         #if canImport(ZipArchive)
         let success = SSZipArchive.createZipFile(atPath: processedIPAPath.path, withContentsOfDirectory: extractedDir.path)
         guard success else {
-            throw NSError(domain: "IPAProcessing", code: 4, userInfo: [NSLocalizedDescriptionKey: "ZipArchive重新打包失败"])
+            throw NSError(domain: "IPAProcessing", code: 4, userInfo: [NSLocalizedDescriptionKey: "ZipArchive đóng gói lại không thành công"])
         }
-        print("🔧 [StoreClient] 使用ZipArchive成功重新打包IPA文件")
+        print("🔧 [StoreClient] Đóng gói lại thành công các tệp IPA bằng cách sử dụng ZipArchive")
         #else
         // 如果没有ZipArchive，抛出错误
-        throw NSError(domain: "IPAProcessing", code: 4, userInfo: [NSLocalizedDescriptionKey: "ZipArchive库未找到，请正确配置依赖"])
+        throw NSError(domain: "IPAProcessing", code: 4, userInfo: [NSLocalizedDescriptionKey: "Không tìm thấy thư viện ZipArchive, vui lòng định cấu hình chính xác sự phụ thuộc"])
         #endif
         
         // 替换原文件
@@ -698,7 +698,7 @@ extension StoreClient {
             let progress = Double(downloadedBytes) / Double(expectedLength)
             let downloadedSize = ByteCountFormatter.string(fromByteCount: downloadedBytes, countStyle: .file)
             let totalSize = ByteCountFormatter.string(fromByteCount: expectedLength, countStyle: .file)
-            progressCallback?(progress, "\(downloadedSize) of \(totalSize) - 完成")
+            progressCallback?(progress, "\(downloadedSize) of \(totalSize) - Hoàn thành")
         }
     }
     private func updateProgress(
@@ -722,22 +722,22 @@ extension StoreClient {
             let seconds = Double(remainingBytes) / bytesPerSecond
             remainingTime = formatTime(seconds)
         } else {
-            remainingTime = "计算中..."
+            remainingTime = "Tính toán ..."
         }
-        let progressText = "\(downloadedSize) / \(totalSize) - \(speedString) - 剩余: \(remainingTime)"
+        let progressText = "\(downloadedSize) / \(totalSize) - \(speedString) - Còn lại: \(remainingTime)"
         progressCallback?(progress, progressText)
     }
     private func formatTime(_ seconds: Double) -> String {
         if seconds < 60 {
-            return "\(Int(seconds))秒"
+            return "\(Int(seconds)) giây"
         } else if seconds < 3600 {
             let minutes = Int(seconds / 60)
             let remainingSeconds = Int(seconds.truncatingRemainder(dividingBy: 60))
-            return "\(minutes)分\(remainingSeconds)秒"
+            return "\(minutes) phút\(remainingSeconds) giây"
         } else {
             let hours = Int(seconds / 3600)
             let minutes = Int((seconds.truncatingRemainder(dividingBy: 3600)) / 60)
-            return "\(hours)小时\(minutes)分钟"
+            return "\(hours) giờ\(minutes) phút"
         }
     }
     // MARK: - Cookie 管理

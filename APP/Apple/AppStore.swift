@@ -35,9 +35,9 @@ class AppStore: ObservableObject {
             accounts = [savedAccount]
             // 自动选择第一个账户作为当前账户
             selectedAccount = savedAccount
-            print("[AppStore] 加载账户: \(savedAccount.email), 地区: \(savedAccount.countryCode)")
+            print("[AppStore] Tải tài khoản: \(savedAccount.email), Khu vực: \(savedAccount.countryCode)")
         } else {
-            print("[AppStore] 没有找到保存的账户")
+            print("[AppStore] Không tìm thấy tài khoản được lưu")
             accounts = []
             selectedAccount = nil
         }
@@ -56,7 +56,7 @@ class AppStore: ObservableObject {
         
         // 自动选择新添加的账户作为当前账户
         selectedAccount = account
-        print("[AppStore] 新账户添加成功: \(account.email), 地区: \(account.countryCode)")
+        print("[AppStore] Tài khoản mới được thêm thành công: \(account.email), 地区: \(account.countryCode)")
         
         saveAccounts()
     }
@@ -117,7 +117,7 @@ class AppStore: ObservableObject {
     /// 切换当前选中的账户
     func selectAccount(_ account: Account) {
         selectedAccount = account
-        print("[AppStore] 切换到账户: \(account.email), 地区: \(account.countryCode)")
+        print("[AppStore] Chuyển sang tài khoản: \(account.email), Khu vực: \(account.countryCode)")
         // 设置账户的cookie到HTTPCookieStorage
         AuthenticationManager.shared.setCookies(account.cookies)
         objectWillChange.send()

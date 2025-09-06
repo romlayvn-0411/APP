@@ -53,7 +53,7 @@ class AuthenticationManager {
         do {
             try saveAccountToKeychain(account)
         } catch {
-            print("警告: 无法将账户保存到钥匙串: \(error)")
+            print("Cảnh báo: Không thể lưu tài khoản vào Keychain: \(error)")
         }
         return account
     }
@@ -101,7 +101,7 @@ class AuthenticationManager {
         do {
             try saveAccountToKeychain(updatedAccount)
         } catch {
-            print("警告: 无法保存更新后的账户: \(error)")
+            print("Cảnh báo: Không thể lưu tài khoản cập nhật: \(error)")
         }
         return updatedAccount
     }

@@ -57,7 +57,7 @@ class PurchaseManager {
             let result = PurchaseResult(
                 trackId: trackId,
                 success: true,
-                message: "应用购买成功",
+                message: "Mua ứng dụng thành công",
                 licenseInfo: nil
             )
             return .success(result)
@@ -130,7 +130,7 @@ class PurchaseManager {
                 let result = PurchaseResult(
                     trackId: appIdentifier,
                     success: true,
-                    message: "应用已拥有，无需购买",
+                    message: "Ứng dụng đã được sở hữu, không cần mua",
                     licenseInfo: nil
                 )
                 return .success(result)
@@ -162,7 +162,7 @@ class PurchaseManager {
         if Int(appIdentifier) != nil {
             // 是曲目 ID，需要进行搜索
             // 这是一个限制 - 需要不同的 API 端点来通过曲目 ID 查找
-            return .failure(.invalidIdentifier("无法通过Track ID获取价格信息，请使用Bundle ID"))
+            return .failure(.invalidIdentifier("Thông tin về giá không thể lấy được thông qua Track ID, vui lòng sử dụng BundleID"))
         } else {
             // 是包 ID
             lookupResult = await searchManager.lookupApp(
@@ -191,28 +191,28 @@ class PurchaseManager {
     private func mapPurchaseError(_ failureType: String, customerMessage: String?) -> PurchaseError {
         switch failureType.lowercased() {
         case let type where type.contains("price"):
-            return .priceMismatch(customerMessage ?? "价格不匹配")
+            return .priceMismatch(customerMessage ?? "Giá không phù hợp")
         case let type where type.contains("country"):
-            return .invalidCountry(customerMessage ?? "无效的国家/地区")
+            return .invalidCountry(customerMessage ?? "Quốc gia/khu vực không hợp lệ")
         case let type where type.contains("password"):
-            return .passwordTokenExpired(customerMessage ?? "密码令牌已过期")
+            return .passwordTokenExpired(customerMessage ?? "Mã thông báo mật khẩu đã hết hạn")
         case let type where type.contains("license"):
-            return .licenseAlreadyExists(customerMessage ?? "许可证已存在")
+            return .licenseAlreadyExists(customerMessage ?? "Giấy phép đã tồn tại")
         case let type where type.contains("payment"):
-            return .paymentRequired(customerMessage ?? "需要付款")
+            return .paymentRequired(customerMessage ?? "Yêu cầu thanh toán")
         default:
-            return .unknownError(customerMessage ?? "未知购买错误")
+            return .unknownError(customerMessage ?? "Không xác định lỗi mua hàng")
         }
     }
     /// 将商店 API 下载错误映射为相应的错误
     private func mapDownloadError(_ failureType: String, customerMessage: String?) -> PurchaseError {
         switch failureType.lowercased() {
         case let type where type.contains("license"):
-            return .licenseCheckFailed(customerMessage ?? "许可证检查失败")
+            return .licenseCheckFailed(customerMessage ?? "Kiểm tra giấy phép không thành công")
         case let type where type.contains("item"):
-            return .appNotFound(customerMessage ?? "应用未找到")
+            return .appNotFound(customerMessage ?? "Không tìm thấy ứng dụng")
         default:
-            return .unknownError(customerMessage ?? "未知错误")
+            return .unknownError(customerMessage ?? "Lỗi không xác định")
         }
     }
 }
@@ -258,25 +258,25 @@ enum PurchaseError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidIdentifier(let message):
-            return "无效的应用标识符: \(message)"
+            return "Định danh ứng dụng không hợp lệ: \(message)"
         case .appNotFound(let message):
-            return "应用未找到: \(message)"
+            return "Không tìm thấy ứng dụng: \(message)"
         case .priceMismatch(let message):
-            return "价格不匹配: \(message)"
+            return "Giá không phù hợp: \(message)"
         case .invalidCountry(let message):
-            return "无效的国家/地区: \(message)"
+            return "Quốc gia/khu vực không hợp lệ: \(message)"
         case .passwordTokenExpired(let message):
-            return "密码令牌已过期: \(message)"
+            return "Mã thông báo mật khẩu đã hết hạn: \(message)"
         case .licenseAlreadyExists(let message):
-            return "许可证已存在: \(message)"
+            return "Giấy phép đã tồn tại: \(message)"
         case .paymentRequired(let message):
-            return "需要付款: \(message)"
+            return "Yêu cầu thanh toán: \(message)"
         case .licenseCheckFailed(let message):
-            return "许可证检查失败: \(message)"
+            return "Kiểm tra giấy phép không thành công: \(message)"
         case .networkError(let error):
-            return "网络错误: \(error.localizedDescription)"
+            return "Lỗi mạng: \(error.localizedDescription)"
         case .unknownError(let message):
-            return "未知错误: \(message)"
+            return "Lỗi không xác định: \(message)"
         }
     }
 }

@@ -245,11 +245,11 @@ extension StoreResponse: Decodable {
             self = .failure(error: Error(rawValue: Int(error) ?? 0) ?? .unknownError)
         } else {
             switch message {
-            case "Your account information was entered incorrectly.":
+            case "Thông tin tài khoản của bạn đã được nhập không chính xác.":
                 self = .failure(error: Error.invalidCredentials)
-            case "An Apple ID verification code is required to sign in. Type your password followed by the verification code shown on your other devices.":
+            case "Một mã xác minh ID Apple được yêu cầu đăng nhập. Nhập mật khẩu của bạn theo sau là mã xác minh được hiển thị trên các thiết bị khác của bạn.":
                 self = .failure(error: Error.codeRequired)
-            case "This Apple ID has been locked for security reasons. Visit iForgot to reset your account (https://iforgot.apple.com).":
+            case "ID Apple này đã bị khóa vì lý do bảo mật. Truy cập iforgot để đặt lại tài khoản của bạn (https://iforgot.apple.com).":
                 self = .failure(error: Error.lockedAccount)
             case let msg where msg?.contains("未能读取数据") == true || msg?.contains("格式不正确") == true:
                 self = .failure(error: Error.invalidCredentials)
