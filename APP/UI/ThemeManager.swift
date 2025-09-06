@@ -8,8 +8,8 @@ import SwiftUI
 import Foundation
 /// 主题模式枚举
 enum ThemeMode: String, CaseIterable {
-    case light = "浅色"
-    case dark = "深色"
+    case light = "Màu sáng"
+    case dark = "Màu tối"
     /// 主题对应的强调色
     var accentColor: Color {
         switch self {
@@ -149,7 +149,7 @@ struct SingleThemePreview: View {
                 .padding(.top, 8)
                 // 标题栏
                 HStack {
-                    Text("设置")
+                    Text("Cài đặt")
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundColor(mode == .light ? .black : .white)
                     Spacer()

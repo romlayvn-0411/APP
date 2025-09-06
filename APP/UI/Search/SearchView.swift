@@ -34,8 +34,8 @@ struct SearchView: View {
         case card = "card"
         var displayName: String {
             switch self {
-            case .list: return "列表"
-            case .card: return "卡片"
+            case .list: return "Danh sách"
+            case .card: return "Thẻ"
             }
         }
         var icon: String {
@@ -51,16 +51,16 @@ struct SearchView: View {
         // 优先级：用户手动选择 > 登录账户地区 > 默认地区
         if isUserSelectedRegion && !searchRegion.isEmpty {
             // 如果用户手动选择了地区，优先使用用户选择
-            print("[SearchView] 使用用户手动选择的地区: \(searchRegion)")
+            print("[SearchView] Sử dụng người dùng để chọn khu vực theo cách thủ công: \(searchRegion)")
             return searchRegion
         } else if let currentAccount = appStore.selectedAccount {
-            print("[SearchView] 使用登录账户地区: \(currentAccount.countryCode)")
+            print("[SearchView] Sử dụng khu vực tài khoản đăng nhập: \(currentAccount.countryCode)")
             // 如果账户地区与当前搜索地区不同，自动更新搜索地区
             if searchRegion != currentAccount.countryCode {
                 DispatchQueue.main.async {
                     self.searchRegion = currentAccount.countryCode
                     self.isUserSelectedRegion = false // 重置用户选择标志
-                    print("[SearchView] 自动更新搜索地区为账户地区: \(currentAccount.countryCode)")
+                    print("[SearchView] Tự động cập nhật khu vực tìm kiếm lên khu vực tài khoản: \(currentAccount.countryCode)")
                     // 触发UI刷新
                     self.uiRefreshTrigger = UUID()
                 }
@@ -68,11 +68,11 @@ struct SearchView: View {
             return currentAccount.countryCode
         } else if !searchRegion.isEmpty {
             // 如果用户手动选择了地区，使用选择
-            print("[SearchView] 使用用户选择的地区: \(searchRegion)")
+            print("[SearchView] Sử dụng các vùng do người dùng chọn: \(searchRegion)")
             return searchRegion
         } else {
             // 默认使用美区，而不是设备地区
-            print("[SearchView] 使用默认美区: US")
+            print("[SearchView] Sử dụng khu vực mặc định: US")
             return "US"
         }
     }
@@ -232,7 +232,7 @@ struct SearchView: View {
             }
         }
         
-        // 将常用地区放在前面 - 包含香港、澳门、台湾等中文地区
+        // Đặt các khu vực chung ở phía trước - bao gồm các khu vực Trung Quốc như Hồng Kông, Macao và Đài Loan
         let commonRegions = ["US", "CN", "HK", "MO", "TW", "JP", "KR", "GB", "DE", "FR", "CA", "AU", "IT", "ES", "NL", "SE", "NO", "DK", "FI", "RU", "BR", "MX", "IN", "SG", "TH", "VN", "MY", "ID", "PH"]
         
         for commonRegion in commonRegions.reversed() {
@@ -398,7 +398,7 @@ struct SearchView: View {
                         Color.clear
                             .frame(height: geometry.safeAreaInsets.top > 0 ? geometry.safeAreaInsets.top : 44)
                             .onAppear {
-                                print("[SearchView] 顶部安全区域: \(geometry.safeAreaInsets.top)")
+                                print("[SearchView] Khu vực an toàn hàng đầu: \(geometry.safeAreaInsets.top)")
                             }
                     }
                     .frame(height: 44) // 固定高度，避免布局跳动
@@ -441,21 +441,21 @@ struct SearchView: View {
         .navigationViewStyle(.stack)
         .onAppear {
             loadSearchHistory()
-            print("[SearchView] 视图加载完成，开始初始化")
+            print("[SearchView] Chế độ xem được tải và khởi tạo bắt đầu")
             
             // 智能地区检测 - 确保在UI加载后执行
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                print("[SearchView] 执行智能地区检测")
+                print("[SearchView] Thực hiện phát hiện khu vực thông minh")
                 detectAndSetRegion()
                 
                 // 打印最终状态
-                print("[SearchView] 初始化完成 - 最终状态:")
+                print("[SearchView] Khởi tạo hoàn thành - Trạng thái cuối cùng:")
                 print("  - searchRegion: \(searchRegion)")
                 print("  - effectiveSearchRegion: \(effectiveSearchRegion)")
                 if let account = appStore.selectedAccount {
-                    print("  - 登录账户: \(account.email), 地区: \(account.countryCode)")
+                    print("  - Đăng nhập vào tài khoản của bạn: \(account.email), Khu vực: \(account.countryCode)")
                 } else {
-                    print("  - 未登录账户")
+                    print("  - Không đăng nhập vào tài khoản")
                 }
                 
                 // 触发UI刷新
@@ -464,22 +464,22 @@ struct SearchView: View {
             
             // 强制刷新UI
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                print("[SearchView] 强制刷新UI")
+                print("[SearchView] Bắt buộc phải làm mới UI")
                 startAnimations()
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ForceRefreshUI"))) { _ in
             // 接收强制刷新通知 - 真机适配
-            print("[SearchView] 接收到强制刷新通知")
+            print("[SearchView] Đã nhận được một thông báo làm mới bắt buộc")
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                print("[SearchView] 真机适配强制刷新完成")
+                print("[SearchView] Force Refresh của sự thích ứng của máy thật được hoàn thành")
                 startAnimations()
             }
         }
         .onReceive(appStore.$selectedAccount) { account in
             // 监听账户变化，自动更新搜索地区
             if let newAccount = account {
-                print("[SearchView] 检测到账户变化: \(newAccount.email), 地区: \(newAccount.countryCode)")
+                print("[SearchView] Thay đổi tài khoản được phát hiện: \(newAccount.email), Khu vực: \(newAccount.countryCode)")
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     detectAndSetRegion()
                     // 强制刷新UI - 使用状态变量触发刷新
@@ -488,7 +488,7 @@ struct SearchView: View {
                     }
                 }
             } else {
-                print("[SearchView] 账户已登出，重置为默认地区")
+                print("[SearchView] Tài khoản đã đăng xuất, đặt lại về Vùng mặc định")
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     detectAndSetRegion()
                 }
@@ -505,23 +505,23 @@ struct SearchView: View {
     // MARK: - 智能地区检测
     private func detectAndSetRegion() {
         let detectedRegion = effectiveSearchRegion
-        print("[SearchView] 智能地区检测完成: \(detectedRegion)")
+        print("[SearchView] Kiểm tra khu vực thông minh đã hoàn thành: \(detectedRegion)")
         
         // 如果检测到的地区与当前不同，且用户没有手动选择，则更新搜索地区
         if searchRegion != detectedRegion && !isUserSelectedRegion {
             searchRegion = detectedRegion
-            print("[SearchView] 搜索地区已更新: \(searchRegion)")
+            print("[SearchView] Khu vực tìm kiếm được cập nhật: \(searchRegion)")
         }
         
         // 打印当前账户信息用于调试
         if let currentAccount = appStore.selectedAccount {
-            print("[SearchView] 当前登录账户: \(currentAccount.email), 地区: \(currentAccount.countryCode)")
-            print("[SearchView] 账户地区与搜索地区匹配: \(currentAccount.countryCode == searchRegion)")
+            print("[SearchView] Tài khoản đăng nhập hiện tại: \(currentAccount.email), Khu vực: \(currentAccount.countryCode)")
+            print("[SearchView] Khớp khu vực tài khoản và khu vực tìm kiếm: \(currentAccount.countryCode == searchRegion)")
         } else {
-            print("[SearchView] 未检测到登录账户，使用默认地区: \(searchRegion)")
+            print("[SearchView] Không có tài khoản đăng nhập nào được phát hiện, sử dụng vùng mặc định: \(searchRegion)")
         }
         
-        print("[SearchView] 用户手动选择标志: \(isUserSelectedRegion)")
+        print("[SearchView] Người dùng chọn thủ công logo: \(isUserSelectedRegion)")
         
         // 强制更新UI - 使用状态变量触发刷新
         DispatchQueue.main.async {
@@ -538,7 +538,7 @@ struct SearchView: View {
                     Image(systemName: "magnifyingglass")
                         .font(.system(size: 18, weight: .medium))
                         .foregroundColor(searchKeyFocused ? themeManager.accentColor : (themeManager.selectedTheme == .dark ? ModernDarkColors.textSecondary : .secondary))
-                    TextField("搜索应用、游戏和更多内容...", text: $searchKey)
+                    TextField("Tìm kiếm ứng dụng, trò chơi và nhiều hơn nữa ...", text: $searchKey)
                         .font(.bodyLarge)
                         .focused($searchKeyFocused)
                         .onChange(of: searchKey) { newValue in
@@ -672,17 +672,17 @@ struct SearchView: View {
                     Image(systemName: "person.circle.fill")
                         .font(.system(size: 10))
                         .foregroundColor(.green)
-                        .help("来自登录账户: \(currentAccount.email)")
+                        .help("Từ tài khoản đăng nhập: \(currentAccount.email)")
                 } else if !searchRegion.isEmpty {
                     Image(systemName: "hand.point.up.fill")
                         .font(.system(size: 10))
                         .foregroundColor(.orange)
-                        .help("用户手动选择")
+                        .help("Lựa chọn thủ công của người dùng")
                 } else {
                     Image(systemName: "globe")
                         .font(.system(size: 10))
                         .foregroundColor(.blue)
-                        .help("默认美区")
+                        .help("Khu vực Mỹ mặc định")
                 }
                 
                 Image(systemName: "chevron.down")
@@ -704,7 +704,7 @@ struct SearchView: View {
         .id("RegionSelector-\(effectiveSearchRegion)-\(uiRefreshTrigger)") // 强制刷新
         .onAppear {
             // 确保地区选择器显示正确的当前地区
-            print("[SearchView] 地区选择器显示，当前地区: \(effectiveSearchRegion)")
+            print("[SearchView] Bộ chọn vùng hiển thị khu vực hiện tại: \(effectiveSearchRegion)")
         }
     }
     
@@ -714,7 +714,7 @@ struct SearchView: View {
             VStack(spacing: 0) {
                 // 当前地区信息
                 VStack(spacing: Spacing.md) {
-                    Text("当前搜索地区")
+                    Text("Vùng tìm kiếm hiện tại")
                         .font(.headline)
                         .foregroundColor(.primary)
                     
@@ -729,21 +729,21 @@ struct SearchView: View {
                             Text(currentRegionInfo)
                                 .font(.caption)
                                 .foregroundColor(.secondary)
-                            Text("地区代码: \(displayRegion)")
+                            Text("Mã vùng: \(displayRegion)")
                                 .font(.caption2)
                                 .foregroundColor(.secondary)
                             
                             // 显示地区来源
                             if isUserSelectedRegion && !searchRegion.isEmpty {
-                                Text("用户手动选择")
+                                Text("Lựa chọn thủ công của người dùng")
                                     .font(.caption2)
                                     .foregroundColor(.orange)
                             } else if let currentAccount = appStore.selectedAccount {
-                                Text("来自登录账户: \(currentAccount.email)")
+                                Text("Từ tài khoản đăng nhập: \(currentAccount.email)")
                                     .font(.caption2)
                                     .foregroundColor(.green)
                             } else {
-                                Text("默认美区")
+                                Text("Khu vực Mỹ mặc định")
                                     .font(.caption2)
                                     .foregroundColor(.blue)
                             }
@@ -759,12 +759,12 @@ struct SearchView: View {
                 
                 // 地区统计信息
                 HStack {
-                    Text("共 \(regionKeys.count) 个地区")
+                    Text("Tổng số \(regionKeys.count) vùng")
                         .font(.caption)
                         .foregroundColor(.secondary)
                     Spacer()
                     if let currentAccount = appStore.selectedAccount {
-                        Text("登录账户: \(currentAccount.countryCode)")
+                        Text("Đăng nhập vào tài khoản của bạn: \(currentAccount.countryCode)")
                             .font(.caption)
                             .foregroundColor(.green)
                     }
@@ -776,7 +776,7 @@ struct SearchView: View {
                 HStack {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.secondary)
-                    TextField("搜索地区...", text: $searchInput)
+                    TextField("Tìm kiếm các vùng ...", text: $searchInput)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .onChange(of: searchInput) { newValue in
                             // 实时搜索地区
@@ -819,12 +819,12 @@ struct SearchView: View {
                                     Image(systemName: "hand.point.up.fill")
                                         .font(.system(size: 12))
                                         .foregroundColor(.orange)
-                                        .help("用户手动选择")
+                                        .help("Lựa chọn thủ công của người dùng")
                                 } else if let currentAccount = appStore.selectedAccount, regionCode == currentAccount.countryCode {
                                     Image(systemName: "person.circle.fill")
                                         .font(.system(size: 12))
                                         .foregroundColor(.green)
-                                        .help("登录账户地区")
+                                        .help("Đăng nhập vào khu vực tài khoản của bạn")
                                 }
                             }
                         }
@@ -832,11 +832,11 @@ struct SearchView: View {
                     }
                 }
             }
-            .navigationTitle("选择搜索地区")
+            .navigationTitle("Chọn vùng tìm kiếm")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("完成") {
+                    Button("Hoàn thành") {
                         showRegionPicker = false
                     }
                 }
@@ -848,7 +848,7 @@ struct SearchView: View {
     private func selectRegion(_ regionCode: String) {
         searchRegion = regionCode
         isUserSelectedRegion = true // 设置用户手动选择标志
-        print("[SearchView] 用户选择地区: \(regionCode)")
+        print("[SearchView] Người dùng chọn khu vực: \(regionCode)")
         
         // 强制更新UI - 使用状态变量触发刷新
         DispatchQueue.main.async {
@@ -866,19 +866,19 @@ struct SearchView: View {
         showRegionPicker = false
         
         // 打印调试信息
-        print("[SearchView] 地区选择完成，当前搜索地区: \(searchRegion)")
-        print("[SearchView] 用户手动选择标志: \(isUserSelectedRegion)")
+        print("[SearchView] Lựa chọn khu vực được hoàn thành, hiện đang được tìm kiếm cho khu vực: \(searchRegion)")
+        print("[SearchView] Người dùng chọn thủ công logo: \(isUserSelectedRegion)")
         print("[SearchView] effectiveSearchRegion: \(effectiveSearchRegion)")
     }
     // MARK: - 搜索历史区域
     var searchHistorySection: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             HStack {
-                Label("最近搜索", systemImage: "clock.arrow.circlepath")
+                Label("Tìm kiếm gần đây", systemImage: "clock.arrow.circlepath")
                     .font(.labelLarge)
                     .foregroundColor(.secondary)
                 Spacer()
-                Button("清除全部") {
+                Button("Xóa tất cả") {
                     withAnimation(.easeInOut) {
                         clearSearchHistory()
                     }
@@ -928,10 +928,10 @@ struct SearchView: View {
             HStack {
                 Image(systemName: "lightbulb.fill")
                     .font(.system(size: 16, weight: .medium))
-                Text("搜索建议")
+                Text("Đề xuất tìm kiếm")
                     .font(.titleSmall)
                 Spacer()
-                Button("关闭") {
+                Button("Đóng") {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         showSearchSuggestions = false
                     }
@@ -992,11 +992,11 @@ struct SearchView: View {
                 // 结果统计和视图切换器
                 HStack {
                     VStack(alignment: .leading, spacing: Spacing.xs) {
-                        Text("找到 \(searchResult.count) 个结果")
+                        Text("Đã tìm thấy \(searchResult.count) kết quả")
                             .font(.titleMedium)
                             .foregroundColor(.primary)
                         if !searchInput.isEmpty {
-                            Text("关于 \"\(searchInput)\"")
+                            Text("Về \"\(searchInput)\"")
                                 .font(.bodySmall)
                                 .foregroundColor(.secondary)
                         }
@@ -1046,10 +1046,10 @@ struct SearchView: View {
                     )
             }
             VStack(spacing: Spacing.xs) {
-                Text("正在搜索...")
+                Text("Tìm kiếm ...")
                     .font(.titleMedium)
                     .foregroundColor(.primary)
-                Text("为您寻找最佳结果")
+                Text("Tìm kết quả tốt nhất cho bạn")
                     .font(.bodyMedium)
                     .foregroundColor(.secondary)
             }
@@ -1073,7 +1073,7 @@ struct SearchView: View {
                     value: animateCards
                 )
             VStack(spacing: Spacing.sm) {
-                Text("APP降级")
+                Text("APP")
                     .font(.titleLarge)
                     .foregroundColor(.primary)
                     .font(.bodyMedium)
@@ -1084,7 +1084,7 @@ struct SearchView: View {
             // 推荐搜索
             if !searchHistory.isEmpty {
                 VStack(alignment: .leading, spacing: Spacing.sm) {
-                    Text("搜索历史")
+                    Text("Lịch sử tìm kiếm")
                         .font(.labelLarge)
                         .foregroundColor(.secondary)
                     HStack(spacing: Spacing.sm) {
@@ -1135,7 +1135,7 @@ struct SearchView: View {
                     .foregroundColor(.materialRed.opacity(0.8))
             }
             VStack(spacing: Spacing.sm) {
-                Text("搜索出现问题")
+                Text("Có một vấn đề với tìm kiếm")
                     .font(.titleLarge)
                     .foregroundColor(.primary)
                 Text(error)
@@ -1154,7 +1154,7 @@ struct SearchView: View {
                 HStack(spacing: Spacing.sm) {
                     Image(systemName: "arrow.clockwise")
                         .font(.system(size: 16, weight: .medium))
-                    Text("重试")
+                    Text("Hãy thử lại")
                         .font(.labelLarge)
                 }
                 .foregroundColor(.white)
@@ -1185,13 +1185,13 @@ struct SearchView: View {
         HStack(spacing: 0) {
             ForEach(ViewMode.allCases, id: \.self) { mode in
                 Button {
-                    print("[SearchView] 视图模式切换: \(viewMode) -> \(mode)")
+                    print("[SearchView] Xem chuyển đổi chế độ: \(viewMode) -> \(mode)")
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                         viewMode = mode
                         // 强制刷新视图模式
                         viewModeRefreshTrigger = UUID()
                     }
-                    print("[SearchView] 视图模式已更新: \(viewMode), 刷新触发器: \(viewModeRefreshTrigger)")
+                    print("[SearchView] Chế độ xem được cập nhật: \(viewMode), kích hoạt làm mới: \(viewModeRefreshTrigger)")
                 } label: {
                     HStack(spacing: Spacing.xs) {
                         Image(systemName: mode.icon)
@@ -1235,7 +1235,7 @@ struct SearchView: View {
                 }
                 .padding(.horizontal, Spacing.lg)
                 .onAppear {
-                    print("[SearchView] 显示卡片视图，结果数量: \(searchResult.count)")
+                    print("[SearchView] Hiển thị chế độ xem thẻ, số kết quả: \(searchResult.count)")
                 }
             } else {
                 // 列表视图
@@ -1247,7 +1247,7 @@ struct SearchView: View {
                 }
                 .padding(.horizontal, Spacing.lg)
                 .onAppear {
-                    print("[SearchView] 显示列表视图，结果数量: \(searchResult.count)")
+                    print("[SearchView] Hiển thị chế độ xem danh sách, số lượng kết quả: \(searchResult.count)")
                 }
             }
             // 加载更多指示器
@@ -1255,7 +1255,7 @@ struct SearchView: View {
                 HStack(spacing: Spacing.sm) {
                     ProgressView()
                         .scaleEffect(0.8)
-                    Text("加载更多...")
+                    Text("Tải thêm ...")
                         .font(.labelMedium)
                         .foregroundColor(.secondary)
                 }
@@ -1303,7 +1303,7 @@ struct SearchView: View {
                         .foregroundColor(.primary)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
-                    Text(item.artistName ?? "未知开发者")
+                    Text(item.artistName ?? "Nhà phát triển không xác định")
                         .font(.bodySmall)
                         .foregroundColor(.secondary)
                         .lineLimit(1)
@@ -1386,7 +1386,7 @@ struct SearchView: View {
                         .fontWeight(.semibold)
                         .foregroundColor(.primary)
                         .lineLimit(1)
-                    Text(item.artistName ?? "未知开发者")
+                    Text(item.artistName ?? "Nhà phát triển không xác định")
                         .font(.bodySmall)
                         .foregroundColor(.secondary)
                         .lineLimit(1)
@@ -1447,7 +1447,7 @@ struct SearchView: View {
         
         // 使用智能检测的地区
         let regionToUse = effectiveSearchRegion
-        print("[SearchView] 执行搜索，使用地区: \(regionToUse)")
+        print("[SearchView] Thực hiện tìm kiếm, sử dụng vùng: \(regionToUse)")
         
         withAnimation(.easeInOut) {
             searching = true
@@ -1594,10 +1594,10 @@ struct SearchView: View {
                 showVersionPicker = true
             }
             do {
-                print("[SearchView] 开始加载应用版本: \(app.trackName)")
+                print("[SearchView] Bắt đầu tải phiên bản ứng dụng: \(app.trackName)")
                 // 获取已保存的账户信息
                 guard let account = AuthenticationManager.shared.loadSavedAccount() else {
-                    throw NSError(domain: "SearchView", code: -1, userInfo: [NSLocalizedDescriptionKey: "未登录账户，无法获取版本信息"])
+                    throw NSError(domain: "SearchView", code: -1, userInfo: [NSLocalizedDescriptionKey: "Không thể đăng nhập vào tài khoản, thông tin phiên bản không thể lấy được"])
                 }
                 // 使用 StoreClient 获取版本信息
                 let result = await StoreClient.shared.getAppVersions(
@@ -1609,9 +1609,9 @@ struct SearchView: View {
                     await MainActor.run {
                         self.availableVersions = versions
                         self.isLoadingVersions = false
-                        print("[SearchView] 成功加载 \(versions.count) 个版本")
+                        print("[SearchView] Đã tải thành công \(versions.count) phiên bản")
                         for version in versions {
-                            print("[SearchView] 版本: \(version.versionString) - ID: \(version.versionId)")
+                            print("[SearchView] Phiên bản: \(version.versionString) - ID: \(version.versionId)")
                         }
                     }
                 case .failure(let error):
@@ -1621,7 +1621,7 @@ struct SearchView: View {
                 await MainActor.run {
                     self.versionError = error.localizedDescription
                     self.isLoadingVersions = false
-                    print("[SearchView] 加载版本失败: \(error)")
+                    print("[SearchView] Không tải phiên bản: \(error)")
                 }
             }
         }
@@ -1656,7 +1656,7 @@ struct SearchView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("返回") {
+                    Button("trở lại") {
                         showVersionPicker = false
                     }
                     .foregroundColor(themeManager.accentColor)
@@ -1684,7 +1684,7 @@ struct SearchView: View {
         VStack(spacing: Spacing.lg) {
             ProgressView()
                 .scaleEffect(1.2)
-            Text("正在加载历史版本...")
+            Text("Đang tải phiên bản lịch sử ...")
                 .font(.bodyMedium)
                 .foregroundColor(.secondary)
         }
@@ -1695,14 +1695,14 @@ struct SearchView: View {
             Image(systemName: "exclamationmark.triangle")
                 .font(.system(size: 48))
                 .foregroundColor(.materialRed)
-            Text("加载失败")
+            Text("Tải không thành công")
                 .font(.titleMedium)
                 .fontWeight(.semibold)
             Text(error)
                 .font(.bodyMedium)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
-            Button("重试") {
+            Button("Hãy thử lại") {
                 if let app = selectedApp {
                     loadVersionsForApp(app)
                 }
@@ -1717,10 +1717,10 @@ struct SearchView: View {
             Image(systemName: "clock.arrow.circlepath")
                 .font(.system(size: 48))
                 .foregroundColor(.secondary)
-            Text("暂无历史版本")
+            Text("Chưa có phiên bản lịch sử nào")
                 .font(.titleMedium)
                 .fontWeight(.semibold)
-            Text("该应用暂时没有可用的历史版本")
+            Text("Hiện tại không có phiên bản lịch sử nào cho ứng dụng này")
                 .font(.bodyMedium)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -1749,14 +1749,14 @@ struct SearchView: View {
                 
                 // 版本数量统计
                 HStack {
-                    Text("历史版本")
+                    Text("Phiên bản lịch sử")
                         .font(.titleMedium)
                         .fontWeight(.bold)
                         .foregroundColor(.primary)
                     
                     Spacer()
                     
-                    Text("\(availableVersions.count) 个版本")
+                    Text("\(availableVersions.count) Phiên bản")
                         .font(.bodySmall)
                         .foregroundColor(.secondary)
                         .padding(.horizontal, Spacing.sm)
@@ -1783,7 +1783,7 @@ struct SearchView: View {
             VStack(alignment: .leading, spacing: Spacing.xs) {
                 // 版本号
                 HStack(spacing: Spacing.sm) {
-                    Text("版本 \(version.versionString)")
+                    Text("Phiên bản \(version.versionString)")
                         .font(.bodyMedium)
                         .fontWeight(.bold)
                         .foregroundColor(themeManager.accentColor)
@@ -1820,7 +1820,7 @@ struct SearchView: View {
                 HStack(spacing: Spacing.xs) {
                     Image(systemName: "arrow.down.circle.fill")
                         .font(.caption)
-                    Text("下载")
+                    Text("Tải xuống")
                         .font(.bodySmall)
                         .fontWeight(.medium)
                 }
@@ -1854,11 +1854,11 @@ struct SearchView: View {
     func downloadVersion(app: iTunesSearchResult, version: AppVersion) async {
         showVersionPicker = false
         guard vm.accounts.first != nil else {
-            print("[SearchView] 错误：没有可用的账户")
+            print("[SearchView] Lỗi: Không có tài khoản")
             return
         }
         let appId = app.trackId
-        print("[SearchView] 开始下载应用: \(app.trackName) 版本: \(version.versionString)")
+        print("[SearchView] Bắt đầu tải xuống ứng dụng: \(app.trackName) phiên bản: \(version.versionString)")
         // 使用UnifiedDownloadManager添加下载请求并开始下载
         let downloadId = UnifiedDownloadManager.shared.addDownload(
             bundleIdentifier: app.bundleId,
@@ -1868,12 +1868,12 @@ struct SearchView: View {
             iconURL: app.artworkUrl512,
             versionId: version.versionId
         )
-        print("[SearchView] 已将下载请求添加到下载管理器，ID: \(downloadId)")
+        print("[SearchView] Yêu cầu tải xuống đã được thêm vào Trình quản lý tải xuống，ID: \(downloadId)")
         // 开始下载
         if let request = UnifiedDownloadManager.shared.downloadRequests.first(where: { $0.id == downloadId }) {
             UnifiedDownloadManager.shared.startDownload(for: request)
         } else {
-            print("[SearchView] 无法找到刚添加的下载请求")
+            print("[SearchView] Yêu cầu tải xuống mà vừa được thêm vào không thể tìm thấy")
         }
     }
 }

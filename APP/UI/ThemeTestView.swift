@@ -15,7 +15,7 @@ struct ThemeTestView: View {
         VStack(spacing: 20) {
             // 当前主题显示
             VStack(spacing: 10) {
-                Text("当前主题")
+                Text("Chủ đề hiện tại")
                     .font(.headline)
                 Text(themeManager.selectedTheme.rawValue)
                     .font(.title)
@@ -28,7 +28,7 @@ struct ThemeTestView: View {
             )
             
             // 主题切换按钮
-            Button("切换主题") {
+            Button("Chuyển đổi chủ đề") {
                 withAnimation(.easeInOut(duration: 0.3)) {
                     themeManager.selectedTheme = themeManager.selectedTheme == .light ? .dark : .light
                 }
@@ -37,7 +37,7 @@ struct ThemeTestView: View {
             .tint(themeManager.accentColor)
             
             // 显示主题选择器
-            Button("显示主题选择器") {
+            Button("Hiển thị bộ chọn chủ đề") {
                 showingThemeSelector = true
             }
             .buttonStyle(.bordered)

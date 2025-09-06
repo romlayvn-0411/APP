@@ -31,12 +31,12 @@ class UnifiedDownloadManager: ObservableObject {
         iconURL: String? = nil,
         versionId: String? = nil
     ) -> UUID {
-        print("🔍 [添加下载] 开始添加下载请求")
+        print("🔍 [Thêm Tải xuống] Bắt đầu thêm yêu cầu tải xuống")
         print("   - Bundle ID: \(bundleIdentifier)")
-        print("   - 名称: \(name)")
-        print("   - 版本: \(version)")
-        print("   - 标识符: \(identifier)")
-        print("   - 版本ID: \(versionId ?? "无")")
+        print("   - Tên: \(name)")
+        print("   - Phiên bản: \(version)")
+        print("   - Định danh: \(identifier)")
+        print("   - ID phiên bản: \(versionId ?? "không có")")
         
         let package = DownloadArchive(
             bundleIdentifier: bundleIdentifier,
@@ -55,10 +55,10 @@ class UnifiedDownloadManager: ObservableObject {
         )
         
         downloadRequests.append(request)
-        print("✅ [添加下载] 下载请求已添加，ID: \(request.id)")
-        print("📊 [添加下载] 当前下载请求总数: \(downloadRequests.count)")
-        print("🖼️ [图标信息] 图标URL: \(request.iconURL ?? "无")")
-        print("📦 [包信息] 包名称: \(request.package.name), 标识符: \(request.package.identifier)")
+        print("✅ [Thêm tải xuống] Yêu cầu tải xuống đã được thêm，ID: \(request.id)")
+        print("📊 [Thêm tải xuống] Tổng số yêu cầu tải xuống hiện tại: \(downloadRequests.count)")
+        print("🖼️ [Thông tin biểu tượng] URL biểu tượng: \(request.iconURL ?? "无")")
+        print("📦 [Thông tin gói] Tên gói: \(request.package.name), Định danh: \(request.package.identifier)")
         return request.id
     }
     
@@ -68,26 +68,26 @@ class UnifiedDownloadManager: ObservableObject {
             downloadRequests.remove(at: index)
             activeDownloads.remove(request.id)
             completedRequests.remove(request.id)
-            print("🗑️ [删除下载] 已删除下载请求: \(request.name)")
+            print("🗑️ [Xóa tải xuống] Yêu cầu tải xuống đã xóa: \(request.name)")
         }
     }
     
     /// 开始下载
     func startDownload(for request: DownloadRequest) {
         guard !activeDownloads.contains(request.id) else { 
-            print("⚠️ [下载跳过] 请求 \(request.id) 已在下载队列中")
+            print("⚠️ [Tải xuống Bỏ qua] Yêu cầu \(request.id) đã ở trong hàng đợi tải xuống")
             return 
         }
         
-        print("🚀 [下载启动] 开始下载: \(request.name) v\(request.version)")
-        print("🔍 [调试] 下载请求详情:")
+        print("🚀 [Tải xuống bắt đầu] Bắt đầu tải xuống: \(request.name) v\(request.version)")
+        print("🔍 [Gỡ lỗi] Tải xuống chi tiết yêu cầu:")
         print("   - Bundle ID: \(request.bundleIdentifier)")
-        print("   - 版本: \(request.version)")
-        print("   - 版本ID: \(request.versionId ?? "无")")
-        print("   - 包标识符: \(request.package.identifier)")
-        print("   - 包名称: \(request.package.name)")
-        print("   - 当前状态: \(request.runtime.status)")
-        print("   - 当前进度: \(request.runtime.progressValue)")
+        print("   - Phiên bản: \(request.version)")
+        print("   - ID phiên bản: \(request.versionId ?? "không có")")
+        print("   - Định danh gói: \(request.package.identifier)")
+        print("   - Tên gói: \(request.package.name)")
+        print("   - Trạng thái hiện tại: \(request.runtime.status)")
+        print("   - Tiến trình hiện tại: \(request.runtime.progressValue)")
         
         activeDownloads.insert(request.id)
         request.runtime.status = .downloading
@@ -97,23 +97,23 @@ class UnifiedDownloadManager: ObservableObject {
         request.runtime.progress = Progress(totalUnitCount: 0)
         request.runtime.progress.completedUnitCount = 0
         
-        print("✅ [状态更新] 状态已设置为: \(request.runtime.status)")
-        print("✅ [进度重置] 进度已重置为: \(request.runtime.progressValue)")
+        print("✅ [Cập nhật trạng thái] Trạng thái đã được đặt thành: \(request.runtime.status)")
+        print("✅ [Đặt lại tiến độ] Đặt lại tiến độ cho: \(request.runtime.progressValue)")
         
         Task {
             do {
                 guard let account = AppStore.this.accounts.first else {
                     await MainActor.run {
-                        request.runtime.error = "请先添加Apple ID账户"
+                        request.runtime.error = "Vui lòng thêm tài khoản ID Apple trước"
                         request.runtime.status = .failed
                         self.activeDownloads.remove(request.id)
-                        print("❌ [认证失败] 未找到有效的Apple ID账户")
+                        print("❌ [Xác thực không thành công] Không tìm thấy tài khoản Apple, ID hợp lệ")
                     }
                     return
                 }
                 
-                print("🔐 [认证信息] 使用账户: \(account.email)")
-                print("🏪 [商店信息] StoreFront: \(account.storeResponse.storeFront)")
+                print("🔐 [Thông tin xác thực] Sử dụng tài khoản: \(account.email)")
+                print("🏪 [Lưu trữ thông tin] StoreFront: \(account.storeResponse.storeFront)")
                 
                 // 确保认证状态
                 AuthenticationManager.shared.setCookies(account.cookies)
@@ -137,8 +137,8 @@ class UnifiedDownloadManager: ObservableObject {
                 let sanitizedName = request.package.name.replacingOccurrences(of: "/", with: "_")
                 let destinationURL = documentsPath.appendingPathComponent("\(sanitizedName)_\(request.version).ipa")
                 
-                print("📁 [文件路径] 目标位置: \(destinationURL.path)")
-                print("🆔 [应用信息] ID: \(request.package.identifier), 版本: \(request.versionId ?? request.version)")
+                print("📁 [Đường dẫn tệp] Vị trí đích: \(destinationURL.path)")
+                print("🆔 [Thông tin ứng dụng] ID: \(request.package.identifier), 版本: \(request.versionId ?? request.version)")
                 
                 // 使用DownloadManager进行下载
                 downloadManager.downloadApp(
@@ -159,7 +159,7 @@ class UnifiedDownloadManager: ObservableObject {
                             // 每1%进度打印一次日志，确保实时更新
                             let progressPercent = Int(downloadProgress.progress * 100)
                             if progressPercent % 1 == 0 && progressPercent > 0 {
-                                print("📊 [下载进度] \(request.name): \(progressPercent)% (\(downloadProgress.formattedSize)) - 速度: \(downloadProgress.formattedSpeed)")
+                                print("📊 [Tải xuống tiến trình] \(request.name): \(progressPercent)% (\(downloadProgress.formattedSize)) - tốc độ: \(downloadProgress.formattedSpeed)")
                             }
                             
                             // 强制触发UI更新 
@@ -180,13 +180,13 @@ class UnifiedDownloadManager: ObservableObject {
                                 // ✅ 添加localFilePath赋值
                                 request.localFilePath = downloadResult.fileURL.path
                                 self.completedRequests.insert(request.id)
-                                print("✅ [下载完成] \(request.name) 已保存到: \(downloadResult.fileURL.path)")
-                                print("📊 [文件信息] 大小: \(ByteCountFormatter().string(fromByteCount: downloadResult.fileSize))")
+                                print("✅ [Tải xuống hoàn thành] \(request.name) Được lưu vào: \(downloadResult.fileURL.path)")
+                                print("📊 [Thông tin tập tin] Kích thước: \(ByteCountFormatter().string(fromByteCount: downloadResult.fileSize))")
                                 
                             case .failure(let error):
                                 request.runtime.error = error.localizedDescription
                                 request.runtime.status = .failed
-                                print("❌ [下载失败] \(request.name): \(error.localizedDescription)")
+                                print("❌ [Tải xuống không thành công] \(request.name): \(error.localizedDescription)")
                             }
                             
                             self.activeDownloads.remove(request.id)
@@ -199,7 +199,7 @@ class UnifiedDownloadManager: ObservableObject {
                     request.runtime.error = error.localizedDescription
                     request.runtime.status = .failed
                     self.activeDownloads.remove(request.id)
-                    print("❌ [下载异常] \(request.name): \(error.localizedDescription)")
+                    print("❌ [Tải xuống ngoại lệ] \(request.name): \(error.localizedDescription)")
                 }
             }
         }
@@ -267,7 +267,7 @@ class DownloadRuntime: ObservableObject {
         
         // 打印调试信息 
         let percent = Int(progressValue * 100)
-        print("🔄 [进度更新] \(percent)% (\(ByteCountFormatter().string(fromByteCount: completed))/\(ByteCountFormatter().string(fromByteCount: total)))")
+        print("🔄 [Cập nhật tiến độ] \(percent)% (\(ByteCountFormatter().string(fromByteCount: completed))/\(ByteCountFormatter().string(fromByteCount: total)))")
         
         // 确保UI立即更新
         DispatchQueue.main.async {
@@ -328,7 +328,7 @@ class DownloadRequest: Identifiable, ObservableObject, Equatable {
         }
         return switch runtime.status {
         case .waiting:
-            NSLocalizedString("等待中...", comment: "")
+            NSLocalizedString("Chờ...", comment: "")
         case .downloading:
             [
                 String(Int(runtime.progressValue * 100)) + "%",
@@ -337,13 +337,13 @@ class DownloadRequest: Identifiable, ObservableObject, Equatable {
             .compactMap { $0 }
             .joined(separator: " ")
         case .paused:
-            NSLocalizedString("已暂停", comment: "")
+            NSLocalizedString("Tạm dừng", comment: "")
         case .completed:
-            NSLocalizedString("已完成", comment: "")
+            NSLocalizedString("Hoàn thành", comment: "")
         case .failed:
-            NSLocalizedString("下载失败", comment: "")
+            NSLocalizedString("Tải xuống không thành công", comment: "")
         case .cancelled:
-            NSLocalizedString("已取消", comment: "")
+            NSLocalizedString("Bị hủy bỏ", comment: "")
         }
     }
     

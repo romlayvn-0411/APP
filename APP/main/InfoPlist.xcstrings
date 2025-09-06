@@ -11,6 +11,12 @@
             "value" : "APP"
           }
         },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "DownAPP"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -26,7 +32,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "此应用需要访问本地网络来提供IPA安装服务"
+            "value" : "Ứng dụng này yêu cầu truy cập vào mạng cục bộ để cung cấp dịch vụ cài đặt IPA"
           }
         }
       }

@@ -316,17 +316,17 @@ class StoreRequest {
                            (plist["dsid"] as? String) ?? 
                            (plist["DSID"] as? String) ?? 
                            (plist["directoryServicesIdentifier"] as? String) ?? ""
-            print("🆔 [DSID结果] 根级别dsPersonId: '\(dsPersonId.isEmpty ? "空" : dsPersonId)'")
-            print("📡 [Pings解析] 搜索pings数组...")
+            print("🆔 [Kết quả DSID] Cấp độ gốc dsPersonID: '\(dsPersonId.isEmpty ? "vô giá trị" : dsPersonId)'")
+            print("📡 [Phân tích Pings] Tìm kiếm mảng Ping ...")
             let pings = plist["pings"] as? [String]
-            print("📡 [Pings结果] pings: \(pings?.count ?? 0) 个项目")
+            print("📡 [Kết quả Pings] pings: \(pings?.count ?? 0) mục")
             // 获取accountInfo中的dsPersonId作为备用
             let accountDsPersonId = accountInfo?.dsPersonId ?? ""
-            print("👤 [账户DSID] accountInfo中的dsPersonId: '\(accountDsPersonId.isEmpty ? "空" : accountDsPersonId)'")
+            print("👤 [Tài khoản DSID] accountInfo trong dsPersonId: '\(accountDsPersonId.isEmpty ? "vô giá trị" : accountDsPersonId)'")
             // 选择最终的dsPersonId（优先使用根级别的，然后是accountInfo中的）
             let finalDsPersonId = !dsPersonId.isEmpty ? dsPersonId : accountDsPersonId
-            print("✅ [最终DSID] 选定的dsPersonId: '\(finalDsPersonId.isEmpty ? "空" : finalDsPersonId)'")
-            print("🏗️ [构建响应] 创建StoreAuthResponse对象...")
+            print("✅ [DSID cuối cùng] dsPersonId đã chọn: '\(finalDsPersonId.isEmpty ? "vô giá trị" : finalDsPersonId)'")
+            print("🏗️ [Xây dựng phản ứng] Tạo Đối tượng StoreAuthResponse...")
             let response = StoreAuthResponse(
                 accountInfo: accountInfo ?? StoreAuthResponse.AccountInfo(
                     appleId: "",
@@ -342,21 +342,21 @@ class StoreRequest {
                 dsPersonId: finalDsPersonId,
                 pings: pings
             )
-            print("✅ [响应完成] StoreAuthResponse创建成功")
-            print("📊 [响应摘要] AppleID: \(response.accountInfo.appleId)")
-            print("📊 [响应摘要] DSID: \(response.dsPersonId.isEmpty ? "空" : response.dsPersonId)")
-            print("📊 [响应摘要] Token: \(response.passwordToken.isEmpty ? "空" : "已获取")")
+            print("✅ [Phản hồi hoàn thành] StoreAuthResponse đã tạo thành công")
+            print("📊 [Tóm tắt phản hồi] AppleID: \(response.accountInfo.appleId)")
+            print("📊 [Tóm tắt phản hồi] DSID: \(response.dsPersonId.isEmpty ? "vô giá trị" : response.dsPersonId)")
+            print("📊 [Tóm tắt phản hồi] Token: \(response.passwordToken.isEmpty ? "vô giá trị" : "Đã mua")")
             return response
         } else {
-            print("❌ [认证失败] HTTP状态码: \(httpResponse.statusCode)")
+            print("❌ [Xác thực thất bại] Mã trạng thái HTTP: \(httpResponse.statusCode)")
             let failureType = plist["failureType"] as? String ?? ""
             let customerMessage = plist["customerMessage"] as? String ?? ""
-            print("❌ [失败类型] failureType: \(failureType)")
-            print("💬 [客户消息] customerMessage: \(customerMessage)")
+            print("❌ [Loại thất bại] failureType: \(failureType)")
+            print("💬 [Thông tin khách hàng] customerMessage: \(customerMessage)")
             if let errorMessage = plist["errorMessage"] as? String {
-                print("💬 [错误消息] errorMessage: \(errorMessage)")
+                print("💬 [Thông báo lỗi] errorMessage: \(errorMessage)")
             }
-            print("🔍 [错误详情] 完整错误响应: \(plist)")
+            print("🔍 [Chi tiết lỗi] Hoàn thành phản hồi lỗi: \(plist)")
             // 处理特殊的认证响应情况
             if !failureType.isEmpty {
                 throw StoreError.fromFailureType(failureType)
@@ -364,7 +364,7 @@ class StoreRequest {
                 throw StoreError.codeRequired
             } else if customerMessage.contains("AMD-Action") {
                 // AMD安全挑战 - 可能需要特殊处理，但目前按成功处理
-                print("⚠️ [AMD挑战] 检测到AMD安全挑战，尝试继续处理...")
+                print("⚠️ [Thử thách AMD] Thử thách bảo mật AMD đã được phát hiện và cố gắng tiếp tục xử lý ...")
                 // 创建一个空的成功响应，让调用者处理
                 let emptyResponse = StoreAuthResponse(
                     accountInfo: StoreAuthResponse.AccountInfo(
@@ -390,11 +390,11 @@ class StoreRequest {
     /// Parse account information from plist
     private func parseAccountInfo(from plist: [String: Any]) -> StoreAuthResponse.AccountInfo? {
         guard let accountInfo = plist["accountInfo"] as? [String: Any] else {
-            print("🔍 [DEBUG] parseAccountInfo: 未找到 accountInfo 字段")
+            print("🔍 [DEBUG] parseAccountInfo: Không tìm thấy trường accountInfo")
             return nil
         }
-        print("🔍 [DEBUG] parseAccountInfo: accountInfo 内容: \(accountInfo)")
-        print("🔍 [DEBUG] parseAccountInfo: accountInfo 所有键: \(Array(accountInfo.keys))")
+        print("🔍 [DEBUG] parseAccountInfo: Nội dung accountInfo: \(accountInfo)")
+        print("🔍 [DEBUG] parseAccountInfo: Tất cả các khoá accountInfo: \(Array(accountInfo.keys))")
         let appleId = accountInfo["appleId"] as? String ?? ""
         let address = accountInfo["address"] as? [String: Any]
         let firstName = address?["firstName"] as? String ?? ""
@@ -403,7 +403,7 @@ class StoreRequest {
         let possibleKeys = ["dsPersonId", "dsPersonID", "dsid", "DSID", "directoryServicesIdentifier"]
         for key in possibleKeys {
             if let value = accountInfo[key] {
-                print("🔍 [DEBUG] parseAccountInfo: 找到键 '\(key)': \(value)")
+                print("🔍 [DEBUG] parseAccountInfo: Tìm khoá '\(key)': \(value)")
             }
         }
         // 尝试多种可能的键名
@@ -412,7 +412,7 @@ class StoreRequest {
                         (accountInfo["dsid"] as? String) ?? 
                         (accountInfo["DSID"] as? String) ?? 
                         (accountInfo["directoryServicesIdentifier"] as? String) ?? ""
-        print("🔍 [DEBUG] parseAccountInfo: 最终获取的 dsPersonId: '\(dsPersonId)')")
+        print("🔍 [DEBUG] parseAccountInfo: Mua lại cuối cùng dsPersonId: '\(dsPersonId)')")
         let countryCode = accountInfo["countryCode"] as? String
         let storeFront = accountInfo["storeFront"] as? String
         return StoreAuthResponse.AccountInfo(
@@ -491,7 +491,7 @@ class StoreRequest {
                                           metadataDict["bundle-short-version-string"] as? String ?? ""
             let softwareVersionExternalIdentifier = String(metadataDict["softwareVersionExternalIdentifier"] as? Int ?? 0)
             let softwareVersionExternalIdentifiers = metadataDict["softwareVersionExternalIdentifiers"] as? [Int]
-            print("[DEBUG] 解析metadata字段:")
+            print("[DEBUG] Phân tích các trường metadata:")
             print("[DEBUG] - bundleId: \(bundleId)")
             print("[DEBUG] - bundleDisplayName: \(bundleDisplayName)")
             print("[DEBUG] - bundleShortVersionString: \(bundleShortVersionString)")

@@ -16,7 +16,7 @@ struct ModernLoginForm: View {
     var body: some View {
         VStack(spacing: 20) {
             VStack(spacing: 8) {
-                Text(showCodeField ? "输入验证码" : "登录 App Store")
+                Text(showCodeField ? "Nhập mã xác nhận" : "Đăng nhập App Store")
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundStyle(
@@ -26,7 +26,7 @@ struct ModernLoginForm: View {
                             endPoint: .trailing
                         )
                     )
-                Text("信息是直接发送给Apple公司")
+                Text("Thông tin được gửi trực tiếp đến Apple")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -37,7 +37,7 @@ struct ModernLoginForm: View {
                         .font(.caption)
                         .fontWeight(.medium)
                         .foregroundColor(.secondary)
-                    TextField("请输入您的 Apple ID", text: $appleId)
+                    TextField("Vui lòng nhập ID Apple của bạn", text: $appleId)
                         .padding()
                         .background(
                             RoundedRectangle(cornerRadius: 12)
@@ -52,11 +52,11 @@ struct ModernLoginForm: View {
                 }
                 if !showCodeField {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("密码")
+                        Text("Mật khẩu")
                             .font(.caption)
                             .fontWeight(.medium)
                             .foregroundColor(.secondary)
-                        SecureField("请输入密码", text: $password)
+                        SecureField("Vui lòng nhập mật khẩu của bạn", text: $password)
                             .padding()
                             .background(
                                 RoundedRectangle(cornerRadius: 12)
@@ -70,11 +70,11 @@ struct ModernLoginForm: View {
                 }
                 if showCodeField {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("双重认证代码")
+                        Text("Mã xác thực hai yếu tố")
                             .font(.caption)
                             .fontWeight(.medium)
                             .foregroundColor(.secondary)
-                        TextField("请输入2FA验证码", text: Binding(get: { code ?? "" }, set: { code = $0 }))
+                        TextField("Vui lòng nhập mã xác minh 2FA", text: Binding(get: { code ?? "" }, set: { code = $0 }))
                             .padding()
                             .background(
                                 RoundedRectangle(cornerRadius: 12)
@@ -97,7 +97,7 @@ struct ModernLoginForm: View {
                         .frame(maxWidth: .infinity)
                         .padding()
                 } else {
-                    Text(showCodeField ? "验证" : "登录认证")
+                    Text(showCodeField ? "Xác minh" : "Xác thực đăng nhập")
                         .font(.headline)
                         .fontWeight(.semibold)
                         .foregroundColor(.white)
@@ -139,7 +139,7 @@ struct ModernLoginForm: View {
                     Image(systemName: "info.circle.fill")
                         .foregroundColor(.orange)
                         .font(.title3)
-                    Text("需要提供双重认证代码2FA才能成功登录")
+                    Text("Mã xác thực hai yếu tố 2FA được yêu cầu đăng nhập thành công")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }

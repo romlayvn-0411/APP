@@ -25,13 +25,13 @@ struct AccountDetailView: View {
                         
                         VStack(spacing: 12) {
                             infoRow(label: "Apple ID", value: account.email)
-                            infoRow(label: "姓名", value: account.name)
+                            infoRow(label: "Tên", value: account.name)
                             infoRow(label: "DS_ID", value: account.dsPersonId)
-                            infoRow(label: "地区", value: account.countryCode)
+                            infoRow(label: "Khu vực", value: account.countryCode)
                             
                             // 密码令牌行（带显示/隐藏功能）
                             HStack {
-                                Text("密码 Token")
+                                Text("Mật khẩu Token")
                                     .foregroundColor(.secondary)
                                     .frame(width: 80, alignment: .leading)
                                 
@@ -59,7 +59,7 @@ struct AccountDetailView: View {
                     }) {
                         HStack {
                             Image(systemName: "trash.fill")
-                            Text("删除账户")
+                            Text("Xóa một tài khoản")
                         }
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
@@ -72,13 +72,13 @@ struct AccountDetailView: View {
             }
             .background(backgroundGradient)
             .navigationBarTitleDisplayMode(.inline)
-            .alert("确认删除", isPresented: $showingDeleteAlert) {
-                Button("删除", role: .destructive) {
+            .alert("Xác nhận xóa", isPresented: $showingDeleteAlert) {
+                Button("Xoá bỏ", role: .destructive) {
                     deleteAccount()
                 }
-                Button("取消", role: .cancel) { }
+                Button("Hủy bỏ", role: .cancel) { }
             } message: {
-                Text("确定要删除这个账户吗？此操作无法撤销。")
+                Text("Bạn có chắc là bạn muốn xóa tài khoản này không? Hoạt động này không thể bị hủy。")
             }
         }
     }
@@ -131,10 +131,10 @@ struct AccountDetailView: View {
     }
     
     private func deleteAccount() {
-        print("[AccountDetailView] 删除账户: \(account.email)")
+        print("[AccountDetailView] Xóa một tài khoản: \(account.email)")
         // 调用AppStore的删除方法
         appStore.delete(id: account.id)
-        print("[AccountDetailView] 删除完成，当前账户数量: \(appStore.accounts.count)")
+        print("[AccountDetailView] Xóa hoàn thành, số tài khoản hiện tại: \(appStore.accounts.count)")
         // 关闭详情页面
         presentationMode.wrappedValue.dismiss()
     }

@@ -68,7 +68,7 @@ struct AddAccountView: View {
                                     .fontWeight(.bold)
                                     .foregroundColor(themeManager.primaryTextColor)
                                 
-                                Text("登录您的账户")
+                                Text("Đăng nhập vào tài khoản của bạn")
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
                             }
@@ -83,7 +83,7 @@ struct AddAccountView: View {
                                 Text("Apple ID")
                                     .font(.headline)
                                     .foregroundColor(themeManager.primaryTextColor)
-                                TextField("输入您的 Apple ID", text: $email)
+                                TextField("Nhập Apple ID của bạn", text: $email)
                                     .textFieldStyle(ModernTextFieldStyle(themeManager: themeManager))
                                     .keyboardType(.emailAddress)
                                     .autocapitalization(.none)
@@ -92,20 +92,20 @@ struct AddAccountView: View {
                             
                             // 密码输入框
                             VStack(alignment: .leading, spacing: 8) {
-                                Text("密码")
+                                Text("Mật khẩu")
                                     .font(.headline)
                                     .foregroundColor(themeManager.primaryTextColor)
-                                SecureField("输入您的密码", text: $password)
+                                SecureField("Nhập mật khẩu của bạn", text: $password)
                                     .textFieldStyle(ModernTextFieldStyle(themeManager: themeManager))
                             }
                             
                             // 双重认证码输入框（条件显示）
                             if showTwoFactorField {
                                 VStack(alignment: .leading, spacing: 8) {
-                                    Text("双重认证码")
+                                    Text("Mã xác thực 2 yếu tố")
                                         .font(.headline)
                                         .foregroundColor(themeManager.primaryTextColor)
-                                    TextField("输入6位验证码", text: $code)
+                                    TextField("Nhập mã xác minh 6 chữ số", text: $code)
                                         .textFieldStyle(ModernTextFieldStyle(themeManager: themeManager))
                                         .keyboardType(.numberPad)
                                         .onChange(of: code) { newValue in
@@ -114,7 +114,7 @@ struct AddAccountView: View {
                                                 code = String(newValue.prefix(6))
                                             }
                                         }
-                                    Text("请查看您的受信任设备或短信获取验证码")
+                                    Text("Vui lòng kiểm tra thiết bị đáng tin cậy hoặc tin nhắn văn bản của bạn để lấy mã xác minh")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
@@ -141,7 +141,7 @@ struct AddAccountView: View {
                                         Image(systemName: "person.crop.circle.fill")
                                             .font(.title2)
                                     }
-                                    Text(isLoading ? "验证中..." : "添加账户")
+                                    Text(isLoading ? "Xác minh ..." : "Thêm một tài khoản")
                                         .fontWeight(.semibold)
                                 }
                                 .frame(maxWidth: .infinity)
@@ -184,7 +184,7 @@ struct AddAccountView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("取消") {
+                    Button("Hủy bỏ") {
                         dismiss()
                     }
                     .foregroundColor(themeManager.primaryTextColor)
@@ -198,65 +198,65 @@ struct AddAccountView: View {
     @MainActor
     private func authenticate() async {
         guard !email.isEmpty && !password.isEmpty else {
-            errorMessage = "请输入完整的Apple ID和密码"
+            errorMessage = "Vui lòng nhập đầy đủ ID Apple và Mật khẩu"
             return
         }
         
-        print("🔐 [AddAccountView] 开始认证流程")
+        print("🔐 [AddAccountView] Bắt đầu quá trình xác thực")
         print("📧 [AddAccountView] Apple ID: \(email)")
-        print("🔐 [AddAccountView] 密码长度: \(password.count)")
-        print("📱 [AddAccountView] 验证码: \(showTwoFactorField ? code : "无")")
+        print("🔐 [AddAccountView] Độ dài mật khẩu: \(password.count)")
+        print("📱 [AddAccountView] Mã xác minh: \(showTwoFactorField ? code : "không có")")
         
         isLoading = true
         errorMessage = ""
         
         do {
-            print("🚀 [AddAccountView] 调用vm.addAccount...")
+            print("🚀 [AddAccountView] Gọi vm.addAccount...")
             // 使用AppStore的addAccount方法进行认证和添加
             try await vm.addAccount(
                 email: email,
                 password: password,
                 code: showTwoFactorField ? code : nil
             )
-            print("✅ [AddAccountView] 认证成功，关闭视图")
+            print("✅ [AddAccountView] Xác thực đã thành công, hãy tắt chế độ xem")
             // 成功后直接关闭视图
             dismiss()
         } catch {
-            print("❌ [AddAccountView] 认证失败: \(error)")
-            print("❌ [AddAccountView] 错误类型: \(type(of: error))")
+            print("❌ [AddAccountView] Xác thực thất bại: \(error)")
+            print("❌ [AddAccountView] Loại lỗi: \(type(of: error))")
             
             isLoading = false
             
             if let storeError = error as? StoreError {
-                print("🔍 [AddAccountView] 检测到StoreError: \(storeError)")
+                print("🔍 [AddAccountView] Đã phát hiện StoreError: \(storeError)")
                 switch storeError {
                 case .invalidCredentials:
-                    errorMessage = "Apple ID或密码错误，请检查后重试"
+                    errorMessage = "ID Apple hoặc mật khẩu không chính xác, vui lòng kiểm tra và thử lại"
                 case .codeRequired:
-                    print("🔐 [AddAccountView] 需要双重认证码")
+                    print("🔐 [AddAccountView] Cần mã xác thực hai yếu tố")
                     if !showTwoFactorField {
                         withAnimation(.easeInOut(duration: 0.3)) {
                             showTwoFactorField = true
                         }
                     } else {
-                        errorMessage = "验证码错误，请检查验证码是否正确"
+                        errorMessage = "Mã xác minh không chính xác, vui lòng kiểm tra xem mã xác minh có đúng không"
                     }
                 case .lockedAccount:
-                    errorMessage = "您的Apple ID已被锁定，请稍后再试或联系Apple支持"
+                    errorMessage = "ID Apple của bạn đã bị khóa, vui lòng thử lại sau hoặc liên hệ với hỗ trợ của Apple"
                 case .networkError:
-                    errorMessage = "在Apple ID认证过程中发生网络错误，请检查您的网络连接后重试"
+                    errorMessage = "Đã xảy ra lỗi mạng trong quá trình xác thực ID Apple. Vui lòng kiểm tra kết nối mạng của bạn và thử lại"
                 case .authenticationFailed:
-                    errorMessage = "认证失败，请检查网络连接和账户信息"
+                    errorMessage = "Xác thực không thành công, vui lòng kiểm tra kết nối mạng và thông tin tài khoản"
                 case .invalidResponse:
-                    errorMessage = "服务器响应无效，请稍后重试"
+                    errorMessage = "Phản hồi máy chủ không hợp lệ, vui lòng thử lại sau"
                 case .unknownError:
-                    errorMessage = "未知错误，请稍后重试"
+                    errorMessage = "Lỗi không xác định, vui lòng thử lại sau"
                 default:
-                    errorMessage = "在Apple ID认证过程中发生错误: \(storeError.localizedDescription)"
+                    errorMessage = "Đã xảy ra lỗi trong quá trình xác thực ID Apple: \(storeError.localizedDescription)"
                 }
             } else {
-                print("🔍 [AddAccountView] 未知错误类型: \(error)")
-                errorMessage = "在Apple ID认证过程中发生错误: \(error.localizedDescription)"
+                print("🔍 [AddAccountView] Loại lỗi không xác định: \(error)")
+                errorMessage = "Đã xảy ra lỗi trong quá trình xác thực ID Apple: \(error.localizedDescription)"
             }
         }
     }

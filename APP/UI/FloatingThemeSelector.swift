@@ -126,7 +126,7 @@ struct FloatingThemeOption: View {
                                     Image(systemName: "magnifyingglass")
                                         .font(.system(size: fontSize - 3))
                                         .foregroundColor(themeSecondaryColor)
-                                    Text("搜索")
+                                    Text("Tìm kiếm")
                                         .font(.system(size: fontSize - 3))
                                         .foregroundColor(themeSecondaryColor)
                                     Spacer()
@@ -170,7 +170,7 @@ struct FloatingThemeOption: View {
                 }
                 
                 // 主题名称
-                Text(mode == .light ? "浅色" : "深色")
+                Text(mode == .light ? "Màu sáng" : "Màu tối")
                     .font(.system(size: fontSize + 2, weight: isSelected ? .bold : .medium))
                     .foregroundColor(isSelected ? ThemeManager.shared.accentColor : .primary)
                 

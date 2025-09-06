@@ -358,7 +358,7 @@ struct ModernProgressIndicator: View {
 struct ModernSearchBar: View {
     @Binding var text: String
     @FocusState private var isFocused: Bool
-    var placeholder: String = "Search"
+    var placeholder: String = "Tìm kiếm"
     var onSubmit: () -> Void = {}
     var body: some View {
         HStack(spacing: Spacing.sm) {
