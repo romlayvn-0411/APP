@@ -1327,8 +1327,7 @@ extension DownloadManager {
         return ipaPath
         #else
         // 如果没有ZipArchive，抛出错误
-        throw NSError(domain: "IPAProcessing", code: 1, userInfo: [NSLocalizedDescriptionKey: "Không tìm thấy thư viện ZipArchive, vui lòng định cấu hình chính xác sự phụ thuộc
-l"])
+        throw NSError(domain: "IPAProcessing", code: 1, userInfo: [NSLocalizedDescriptionKey: "Không tìm thấy thư viện ZipArchive, vui lòng định cấu hình chính xác sự phụ thuộc"])
         #endif
     }
     
