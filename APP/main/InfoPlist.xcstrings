@@ -11,12 +11,6 @@
             "value" : "APP"
           }
         },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "DownAPP"
-          }
-        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
