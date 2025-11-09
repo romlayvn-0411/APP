@@ -6,6 +6,7 @@
 //
 import Foundation
 import SwiftUI
+
 /// 搜索错误类型
 enum SearchError: Error, LocalizedError {
     case networkError(Error)
@@ -134,6 +135,7 @@ class iTunesClient: @unchecked Sendable {
     static let shared = iTunesClient()
     private let session: URLSession
     private let baseURL = "https://itunes.apple.com"
+    
     private init() {
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 30
@@ -330,7 +332,7 @@ class iTunesClient: @unchecked Sendable {
     
     /// 应用版本信息
     struct AppVersionInfo: Codable, Identifiable, Hashable {
-        /// 版本号 (例如: "1.0.0")
+        /// 版本号 
         let version: String
         
         /// 版本发布日期

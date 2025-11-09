@@ -30,7 +30,7 @@ struct FeatherApp: App {
 	
 	var body: some Scene {
 		WindowGroup {
-			VariedTabbarView()
+			TabbarView()
 				.environmentObject(themeManager)
 				.environmentObject(appStore)
 				.onOpenURL(perform: _handleURL)
@@ -63,7 +63,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     }
         
     private func setupLibraryPaths() {
-        // Tools文件夹已删除，不再需要设置库文件路径
+        // 库文件路径,有空再完善
     }
         
     private func createDocumentsDirectories() {

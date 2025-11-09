@@ -392,7 +392,7 @@
 					"$(PROJECT_DIR)/APP/Supporting",
 				);
 				INFOPLIST_FILE = APP/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -403,7 +403,7 @@
 					"$(PROJECT_DIR)/APP",
 					"$(PROJECT_DIR)/APP/ElleKit",
 				);
-				MARKETING_VERSION = 2.4.5;
+				MARKETING_VERSION = 2.4.6;
 				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.pxx917144686.App2025;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -445,7 +445,7 @@
 					"$(PROJECT_DIR)/APP/Supporting",
 				);
 				INFOPLIST_FILE = APP/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -456,7 +456,7 @@
 					"$(PROJECT_DIR)/APP",
 					"$(PROJECT_DIR)/APP/ElleKit",
 				);
-				MARKETING_VERSION = 2.4.5;
+				MARKETING_VERSION = 2.4.6;
 				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.pxx917144686.App2025;
 				PRODUCT_NAME = "$(TARGET_NAME)";
