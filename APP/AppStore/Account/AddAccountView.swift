@@ -105,18 +105,21 @@ struct AddAccountView: View {
                                         .keyboardType(.numberPad)
                                         .focused($isCodeFieldFocused)
                                         .onChange(of: code) { newValue in
-                                            // 限制输入长度为6位
-                                            if newValue.count > 6 {
-                                                code = String(newValue.prefix(6))
-                                            }
+                                            // 限制只能输入数字
+                                            code = String(newValue.filter { $0.isNumber })
                                             
-                                            // 当输入6位验证码时自动缩回键盘并开始认证
-                                            if newValue.count == 6 {
+                                            // 限制输入长度为6位
+                                            if code.count > 6 {
+                                                code = String(code.prefix(6))
+                                            }
+
+                                            // 当输入6位验证码时自动开始认证
+                                            if code.count == 6 {
                                                 // 延迟一点时间让用户看到输入完成
                                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                                                     // 缩回键盘
                                                     isCodeFieldFocused = false
-                                                    
+
                                                     // 自动开始认证
                                                     Task {
                                                         await authenticate()
@@ -148,8 +151,7 @@ struct AddAccountView: View {
                                             .progressViewStyle(CircularProgressViewStyle(tint: .white))
                                             .scaleEffect(0.8)
                                     } else {
-                                        Image(systemName: "person.crop.circle.fill")
-                                            .font(.title2)
+                                        // 移除头像图标
                                     }
                                     Text(isLoading ? "验证中..." : "添加账户")
                                         .fontWeight(.semibold)
@@ -206,77 +208,102 @@ struct AddAccountView: View {
     }
     @MainActor
     private func authenticate() async {
-        guard !email.isEmpty && !password.isEmpty else {
+        // 验证输入
+        if email.isEmpty || password.isEmpty {
             errorMessage = "请输入完整的Apple ID和密码"
             return
         }
         
+        if showTwoFactorField && code.count != 6 {
+            errorMessage = "请输入6位验证码"
+            // 聚焦到验证码输入框
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self.isCodeFieldFocused = true
+            }
+            return
+        }
+        
+        // 记录认证开始
         print("🔐 [AddAccountView] 开始认证流程")
         print("📧 [AddAccountView] Apple ID: \(email)")
         print("🔐 [AddAccountView] 密码长度: \(password.count)")
         print("📱 [AddAccountView] 验证码: \(showTwoFactorField ? code : "无")")
         
+        // 更新UI状态
         isLoading = true
         errorMessage = ""
-        
-        // 缩回键盘
         isCodeFieldFocused = false
         
         do {
-            print("🚀 [AddAccountView] 调用vm.loginAccount...")
-            // 使用AppStore的loginAccount方法进行认证和登录
+            // 调用AppStore的loginAccount方法进行认证
             try await vm.loginAccount(
                 email: email,
                 password: password,
                 code: showTwoFactorField ? code : nil
             )
+            
             print("✅ [AddAccountView] 认证成功，关闭视图")
-            // 成功后直接关闭视图
+            // 认证成功后关闭视图
             dismiss()
         } catch {
             print("❌ [AddAccountView] 认证失败: \(error)")
             print("❌ [AddAccountView] 错误类型: \(type(of: error))")
             
+            // 更新加载状态
             isLoading = false
             
+            // 处理不同类型的错误
             if let storeError = error as? StoreError {
                 print("🔍 [AddAccountView] 检测到StoreError: \(storeError)")
+                
                 switch storeError {
                 case .invalidCredentials:
                     errorMessage = "Apple ID或密码错误，请检查后重试"
                 case .codeRequired:
-                    print("🔐 [AddAccountView] 需要双重认证码")
-                    if !showTwoFactorField {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            showTwoFactorField = true
-                        }
-                        // 延迟聚焦到验证码输入框
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                            isCodeFieldFocused = true
-                        }
-                    } else {
-                        errorMessage = "验证码错误，请检查验证码是否正确"
-                        // 重新聚焦到验证码输入框
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                            isCodeFieldFocused = true
-                        }
-                    }
+                    handleTwoFactorAuthRequired()
                 case .lockedAccount:
                     errorMessage = "您的Apple ID已被锁定，请稍后再试或联系Apple支持"
                 case .networkError:
-                    errorMessage = "在Apple ID认证过程中发生网络错误，请检查您的网络连接后重试"
+                    errorMessage = "网络连接错误，请检查网络设置后重试"
                 case .authenticationFailed:
-                    errorMessage = "认证失败，请检查网络连接和账户信息"
+                    errorMessage = "认证失败，请检查您的网络连接和账户信息"
                 case .invalidResponse:
                     errorMessage = "服务器响应无效，请稍后重试"
                 case .unknownError:
                     errorMessage = "未知错误，请稍后重试"
                 default:
-                    errorMessage = "在Apple ID认证过程中发生错误: \(storeError.localizedDescription)"
+                    errorMessage = "认证过程中发生错误: \(storeError.localizedDescription)"
                 }
             } else {
+                // 处理其他类型的错误
                 print("🔍 [AddAccountView] 未知错误类型: \(error)")
-                errorMessage = "在Apple ID认证过程中发生错误: \(error.localizedDescription)"
+                errorMessage = "认证过程中发生错误: \(error.localizedDescription)"
+            }
+        }
+    }
+    
+    // 处理需要双重认证的情况
+    private func handleTwoFactorAuthRequired() {
+        print("🔐 [AddAccountView] 需要双重认证码")
+        
+        if !showTwoFactorField {
+            // 显示双重认证输入框
+            withAnimation(.easeInOut(duration: 0.3)) {
+                showTwoFactorField = true
+            }
+            
+            // 延迟聚焦到验证码输入框
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                self.isCodeFieldFocused = true
+            }
+        } else {
+            // 验证码错误的情况
+            errorMessage = "验证码错误，请检查验证码是否正确"
+            
+            // 清空验证码并重新聚焦
+            code = ""
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self.isCodeFieldFocused = true
             }
         }
     }

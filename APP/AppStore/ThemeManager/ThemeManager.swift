@@ -97,7 +97,7 @@ class ThemeManager: ObservableObject, @unchecked Sendable {
     }
 }
 
-struct ModernDarkColors {
+public struct ModernDarkColors {
     static let backgroundPrimary = Color(red: 0.07, green: 0.07, blue: 0.09)
     static let surfacePrimary = Color(red: 0.12, green: 0.12, blue: 0.14)
     static let surfaceSecondary = Color(red: 0.18, green: 0.18, blue: 0.20)

@@ -3,9 +3,9 @@ import SwiftUI
 import UIKit
 
 struct AppearanceTintColorView: View {
-	@AppStorage("Feather.userTintColor") private var selectedColorHex: String = "#B496DC"
+	@AppStorage("APP.userTintColor") private var selectedColorHex: String = "#007AFF"
 	@State private var showingColorPicker = false
-	@State private var selectedColor = Color(hex: "#B496DC")
+	@State private var selectedColor = Color(hex: "#007AFF")
 	
 	var body: some View {
 		VStack(spacing: 20) {
@@ -124,7 +124,10 @@ struct AppearanceTintColorView: View {
 			ColorPickerView(selectedColor: $selectedColor, selectedColorHex: $selectedColorHex)
 		}
 		.onChange(of: selectedColorHex) { value in
-			UIApplication.topViewController()?.view.window?.tintColor = UIColor(Color(hex: value))
+			if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+			   let window = windowScene.windows.first {
+				window.tintColor = UIColor(Color(hex: value))
+			}
 		}
 		.onAppear {
 			selectedColor = Color(hex: selectedColorHex)

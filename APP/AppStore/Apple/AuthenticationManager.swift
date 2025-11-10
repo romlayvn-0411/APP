@@ -261,10 +261,8 @@ class AuthenticationManager: @unchecked Sendable {
         
         // 3. 从Cookie中检测地区信息
         let cookieCountryCode = detectCountryCodeFromCookies()
-        if cookieCountryCode != "US" {
-            print("🌍 [地区检测] 从Cookie检测地区代码: \(cookieCountryCode)")
-            return cookieCountryCode
-        }
+        print("🌍 [地区检测] 从Cookie检测地区代码: \(cookieCountryCode)")
+        return cookieCountryCode
         
         // 4. 从邮箱域名推断地区（作为最后手段，但要谨慎）
         let emailCountryCode = inferCountryCodeFromEmail(email)
@@ -279,14 +277,17 @@ class AuthenticationManager: @unchecked Sendable {
     private func inferCountryCodeFromStoreFront(_ storeFront: String) -> String {
         // 提取StoreFront的数字部分
         let storeFrontCode = storeFront.components(separatedBy: "-").first ?? storeFront
+        print("🔍 [StoreFront解析] 提取的数字部分: \(storeFrontCode)")
         
         // 反向查找地区代码映射
         for (countryCode, code) in Apple.storeFrontCodeMap {
             if code == storeFrontCode {
+                print("✅ [地区映射] 找到匹配: StoreFront=\(storeFrontCode) -> 国家代码=\(countryCode)")
                 return countryCode
             }
         }
         
+        print("❌ [地区映射] 未找到匹配的StoreFront代码: \(storeFrontCode)")
         return "US" // 默认值
     }
     

@@ -471,10 +471,8 @@ class StoreRequest: @unchecked Sendable {
         // 2. 从storeFront推断
         if let storeFront = accountInfo["storeFront"] as? String, !storeFront.isEmpty {
             let inferredCountryCode = inferCountryCodeFromStoreFront(storeFront)
-            if inferredCountryCode != "US" {
-                print("🌍 [地区检测] 从storeFront推断countryCode: \(inferredCountryCode)")
-                return inferredCountryCode
-            }
+            print("🌍 [地区检测] 从storeFront推断countryCode: \(inferredCountryCode)")
+            return inferredCountryCode
         }
         
         // 3. 检查其他可能的地区相关字段
@@ -513,14 +511,17 @@ class StoreRequest: @unchecked Sendable {
     private func inferCountryCodeFromStoreFront(_ storeFront: String) -> String {
         // 提取StoreFront的数字部分
         let storeFrontCode = storeFront.components(separatedBy: "-").first ?? storeFront
+        print("🔍 [StoreFront解析] 提取的数字部分: \(storeFrontCode)")
         
         // 反向查找地区代码映射
         for (countryCode, code) in Apple.storeFrontCodeMap {
             if code == storeFrontCode {
+                print("✅ [地区映射] 找到匹配: StoreFront=\(storeFrontCode) -> 国家代码=\(countryCode)")
                 return countryCode
             }
         }
         
+        print("❌ [地区映射] 未找到匹配的StoreFront代码: \(storeFrontCode)")
         return "US" // 默认值
     }
     /// Parse download response

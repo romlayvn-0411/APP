@@ -72,11 +72,11 @@ class SessionManager: ObservableObject, @unchecked Sendable {
                 reconnectAttempts = 0
                 lastSessionCheck = Date()
             } else {
-                print("❌ [SessionManager] 会话无效，需要重新认证")
+                print("❌ [SessionManager] 无效，需要重新认证")
                 await handleSessionInvalid()
             }
         } catch {
-            print("❌ [SessionManager] 会话检查失败: \(error)")
+            print("❌ [SessionManager] 检查出错: \(error)")
             await handleSessionInvalid()
         }
     }
@@ -144,9 +144,7 @@ class SessionManager: ObservableObject, @unchecked Sendable {
         NotificationCenter.default.post(name: .sessionRestored, object: nil)
         
         // 通知AppStore
-        if let appStore = AppStore.this as? AppStore {
-            appStore.refreshAccount()
-        }
+        AppStore.this.refreshAccount()
     }
     
     // MARK: - 手动操作
@@ -234,7 +232,7 @@ extension UnifiedDownloadManager {
     }
     
     /// 处理会话恢复
-    private func handleSessionRestored() async {
+    fileprivate func handleSessionRestored() async {
         print("🔄 [UnifiedDownloadManager] 处理会话恢复")
         
         // 恢复失败的下载任务
@@ -249,7 +247,7 @@ extension UnifiedDownloadManager {
     }
     
     /// 处理会话失效
-    private func handleSessionInvalid() async {
+    fileprivate func handleSessionInvalid() async {
         print("⏸️ [UnifiedDownloadManager] 处理会话失效")
         
         // 暂停所有下载任务

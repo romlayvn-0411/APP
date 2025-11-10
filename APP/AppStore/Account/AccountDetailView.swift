@@ -76,7 +76,10 @@ struct AccountDetailView: View {
                 Button("删除", role: .destructive) {
                     deleteAccount()
                 }
-                Button("取消", role: .cancel) { }
+                Button("取消", role: .cancel) { 
+                    print("[AccountDetailView] 取消删除操作")
+                    showingDeleteAlert = false
+                }
             } message: {
                 Text("确定要删除这个账户吗？此操作无法撤销。")
             }

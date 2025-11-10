@@ -35,18 +35,7 @@ struct AccountView: View {
                         VStack(spacing: 30) {
                             Spacer()
                             VStack(spacing: 20) {
-                                // Logo with Animation - 修复动画问题
-                                Image(systemName: "person.circle.fill")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 120, height: 120)
-                                    .foregroundColor(.blue)
-                                    .scaleEffect(animation ? 1.05 : 1.0) // 减少动画幅度
-                                    .opacity(animation ? 0.9 : 0.7) // 减少透明度变化
-                                    .animation(
-                                        Animation.easeInOut(duration: 1.5).repeatForever(autoreverses: true), // 减少动画时长
-                                        value: animation
-                                    )
+                                // 移除头像图标，直接显示文字内容
                                 // Welcome Text
                                 VStack(spacing: 12) {
                                     Text("Apple ID")
@@ -160,7 +149,10 @@ struct AccountView: View {
         .navigationViewStyle(.stack)
         .background(Color(.systemBackground)) // 确保整个视图有背景色
         .alert("确认删除", isPresented: $showDeleteAlert) {
-            Button("取消", role: .cancel) { }
+            Button("取消", role: .cancel) { 
+                print("[AccountView] 取消删除操作")
+                accountToDelete = nil
+            }
             Button("删除", role: .destructive) {
                 if let account = accountToDelete {
                     print("[AccountView] 用户确认删除账户: \(account.email)")
@@ -205,12 +197,7 @@ struct AccountRowView: View {
     
     var body: some View {
         HStack(spacing: 16) {
-            // 账户头像
-            Image(systemName: "person.circle.fill")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 50, height: 50)
-                .foregroundColor(.blue)
+            // 头像已移除
             
             // 账户信息
             VStack(alignment: .leading, spacing: 6) { // 增加间距

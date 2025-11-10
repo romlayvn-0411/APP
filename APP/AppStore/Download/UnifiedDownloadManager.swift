@@ -27,7 +27,30 @@ class UnifiedDownloadManager: ObservableObject, @unchecked Sendable {
     private let purchaseManager = PurchaseManager.shared
     
     private init() {
-        setupSessionMonitoring()
+        // 初始化时设置会话监控
+        configureSessionMonitoring()
+    }
+    
+    /// 设置会话监控，处理应用前后台切换和持久化下载任务
+    private func configureSessionMonitoring() {
+        // 恢复下载任务
+        restoreDownloadTasks()
+        
+        // 监听应用即将进入非活动状态通知
+        NotificationCenter.default.addObserver(forName: UIApplication.willResignActiveNotification, object: nil, queue: .main) { [weak self] _ in
+            self?.saveDownloadTasks()
+            self?.pauseAllDownloads()
+        }
+        
+        // 监听应用已激活通知
+        NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
+            self?.checkAndResumeDownloads()
+        }
+        
+        // 监听应用即将终止通知
+        NotificationCenter.default.addObserver(forName: UIApplication.willTerminateNotification, object: nil, queue: .main) { [weak self] _ in
+            self?.saveDownloadTasks()
+        }
     }
     
     /// 添加下载请求
@@ -98,7 +121,7 @@ class UnifiedDownloadManager: ObservableObject, @unchecked Sendable {
         print("   - 当前进度: \(request.runtime.progressValue)")
         
         activeDownloads.insert(request.id)
-        request.runtime.status = .downloading
+        request.runtime.status = DownloadStatus.downloading
         request.runtime.error = nil
         
         // 重置进度，使用动态大小
@@ -112,7 +135,7 @@ class UnifiedDownloadManager: ObservableObject, @unchecked Sendable {
             guard let account = AppStore.this.selectedAccount else {
                 await MainActor.run {
                     request.runtime.error = "请先添加Apple ID账户"
-                    request.runtime.status = .failed
+                    request.runtime.status = DownloadStatus.failed
                     self.activeDownloads.remove(request.id)
                     print("❌ [认证失败] 未找到有效的Apple ID账户")
                 }
@@ -144,7 +167,7 @@ class UnifiedDownloadManager: ObservableObject, @unchecked Sendable {
             if !isValid {
                 await MainActor.run {
                     request.runtime.error = "Apple ID会话已过期，请重新登录"
-                    request.runtime.status = .failed
+                    request.runtime.status = DownloadStatus.failed
                     self.activeDownloads.remove(request.id)
                     print("❌ [会话失效] Apple ID会话已过期")
                 }
@@ -157,7 +180,7 @@ class UnifiedDownloadManager: ObservableObject, @unchecked Sendable {
             if !regionValidation {
                 await MainActor.run {
                     request.runtime.error = "地区设置不匹配，请检查账户地区设置"
-                    request.runtime.status = .failed
+                    request.runtime.status = DownloadStatus.failed
                     self.activeDownloads.remove(request.id)
                     print("❌ [地区错误] 账户地区与设置不匹配")
                 }
@@ -183,7 +206,7 @@ class UnifiedDownloadManager: ObservableObject, @unchecked Sendable {
             case .failure(let error):
                 await MainActor.run {
                     request.runtime.error = error.localizedDescription
-                    request.runtime.status = .failed
+                    request.runtime.status = DownloadStatus.failed
                     self.activeDownloads.remove(request.id)
                     print("❌ [购买失败] \(request.name): \(error.localizedDescription)")
                 }
@@ -218,7 +241,23 @@ class UnifiedDownloadManager: ObservableObject, @unchecked Sendable {
                         total: downloadProgress.totalBytes
                     )
                     request.runtime.speed = downloadProgress.formattedSpeed
-                    request.runtime.status = downloadProgress.status
+                    // 转换AppStoreDownloadStatus为DownloadStatus
+                    switch downloadProgress.status {
+                    case .waiting:
+                        request.runtime.status = DownloadStatus.waiting
+                    case .downloading:
+                        request.runtime.status = DownloadStatus.downloading
+                    case .paused:
+                        request.runtime.status = DownloadStatus.paused
+                    case .completed:
+                        request.runtime.status = DownloadStatus.completed
+                    case .failed:
+                        request.runtime.status = DownloadStatus.failed
+                    case .cancelled:
+                        request.runtime.status = DownloadStatus.cancelled
+                    default:
+                        request.runtime.status = DownloadStatus.waiting
+                    }
                     
                     // 每1%进度打印一次日志，确保实时更新
                     let progressPercent = Int(downloadProgress.progress * 100)
@@ -240,7 +279,7 @@ class UnifiedDownloadManager: ObservableObject, @unchecked Sendable {
                             completed: downloadResult.fileSize,
                             total: downloadResult.fileSize
                         )
-                        request.runtime.status = .completed
+                        request.runtime.status = DownloadStatus.completed
                         // ✅ 添加localFilePath赋值
                         request.localFilePath = downloadResult.fileURL.path
                         self.completedRequests.insert(request.id)
@@ -251,7 +290,7 @@ class UnifiedDownloadManager: ObservableObject, @unchecked Sendable {
                         
                     case .failure(let error):
                         request.runtime.error = error.localizedDescription
-                        request.runtime.status = .failed
+                        request.runtime.status = DownloadStatus.failed
                         print("❌ [下载失败] \(request.name): \(error.localizedDescription)")
                     }
                     
@@ -300,7 +339,7 @@ struct DownloadArchive {
 
 /// 下载运行时信息
 class DownloadRuntime: ObservableObject {
-    @Published var status: DownloadStatus = .waiting
+    @Published var status: DownloadStatus = DownloadStatus.waiting
     @Published var progress: Progress = Progress(totalUnitCount: 0)
     @Published var speed: String = ""
     @Published var error: String?
@@ -384,22 +423,22 @@ class DownloadRequest: Identifiable, ObservableObject, Equatable, @unchecked Sen
             return error
         }
         return switch runtime.status {
-        case .waiting:
+        case DownloadStatus.waiting:
             "等待中..."
-        case .downloading:
+        case DownloadStatus.downloading:
             [
                 String(Int(runtime.progressValue * 100)) + "%",
                 runtime.speed.isEmpty ? "" : runtime.speed,
             ]
             .compactMap { $0 }
             .joined(separator: " ")
-        case .paused:
+        case DownloadStatus.paused:
             "已暂停"
-        case .completed:
+        case DownloadStatus.completed:
             "已完成"
-        case .failed:
+        case DownloadStatus.failed:
             "下载失败"
-        case .cancelled:
+        case DownloadStatus.cancelled:
             "已取消"
         }
     }
@@ -502,8 +541,8 @@ extension UnifiedDownloadManager {
         NSLog("⏸️ [UnifiedDownloadManager] 暂停所有下载任务")
         
         for request in downloadRequests {
-            if request.runtime.status == .downloading {
-                request.runtime.status = .paused
+            if request.runtime.status == DownloadStatus.downloading {
+                request.runtime.status = DownloadStatus.paused
                 activeDownloads.remove(request.id)
                 NSLog("⏸️ [UnifiedDownloadManager] 已暂停: \(request.name)")
             }
@@ -520,8 +559,8 @@ extension UnifiedDownloadManager {
             if let localFilePath = request.localFilePath,
                FileManager.default.fileExists(atPath: localFilePath) {
                 // 只要文件存在且未标记完成，则标记为已完成
-                if request.runtime.status != .completed {
-                    request.runtime.status = .completed
+                if request.runtime.status != DownloadStatus.completed {
+                    request.runtime.status = DownloadStatus.completed
                     completedRequests.insert(request.id)
                     activeDownloads.remove(request.id)
                     NSLog("✅ [UnifiedDownloadManager] 标记为已完成(文件存在): \(request.name)")
@@ -531,9 +570,9 @@ extension UnifiedDownloadManager {
                     completedRequests.insert(request.id)
                     NSLog("✅ [UnifiedDownloadManager] 补充标记为已完成: \(request.name)")
                 }
-            } else if request.runtime.status == .downloading {
+            } else if request.runtime.status == DownloadStatus.downloading {
                 // 如果文件不存在但状态是下载中，标记为失败
-                request.runtime.status = .failed
+                request.runtime.status = DownloadStatus.failed
                 request.runtime.error = "文件丢失，请重新下载"
                 activeDownloads.remove(request.id)
                 NSLog("❌ [UnifiedDownloadManager] 标记丢失文件为失败: \(request.name)")

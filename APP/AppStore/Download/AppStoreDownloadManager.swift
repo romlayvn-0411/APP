@@ -12,9 +12,25 @@ import UIKit
 import ZipArchive
 #endif
 
-// 导入自定义弹窗组件
-// import APP.AppStore降级.UI.UnpurchasedAlert // 暂时注释，实际项目中应该使用正确的导入路径
-
+// MARK: - URLSessionDelegate
+// 后台会话完成事件处理
+extension AppStoreDownloadManager {
+    func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
+        print("📱 [后台会话] 所有任务已完成")
+        
+        // 检查是否有对应的完成处理器
+        if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
+            if let completionHandler = appDelegate.backgroundSessionCompletionHandler {
+                // 存储完成处理器，稍后在主线程调用
+                DispatchQueue.main.async {
+                    print("✅ [后台会话] 调用完成处理器")
+                    completionHandler()
+                    appDelegate.backgroundSessionCompletionHandler = nil
+                }
+            }
+        }
+    }
+}
 // 为了避免与StoreRequest.swift中的类型冲突，这里使用不同的名称
 struct DownloadStoreItem {
     let url: String
@@ -587,8 +603,8 @@ class AppStoreDownloadManager: NSObject, ObservableObject, URLSessionDownloadDel
                 Double(task.countOfBytesReceived) / Double(task.countOfBytesExpectedToReceive) : 0.0,
             speed: 0, // 需要根据时间计算
             remainingTime: 0, // 需要计算
-            status: task.state == .running ? .downloading : 
-                   task.state == .suspended ? .paused : .completed
+            status: task.state == .running ? DownloadStatus.downloading : 
+                   task.state == .suspended ? DownloadStatus.paused : DownloadStatus.completed
         )
     }
     
@@ -1112,7 +1128,7 @@ extension AppStoreDownloadManager {
             progress: progressValue,
             speed: speed,
             remainingTime: remainingTime,
-            status: .downloading
+            status: DownloadStatus.downloading
         )
         // 修复UI更新频率控制逻辑，确保进度实时更新
         let lastUIUpdateTime = lastUIUpdate[downloadId] ?? Date.distantPast
@@ -1193,14 +1209,7 @@ extension AppStoreDownloadManager {
 }
 // MARK: - 下载模型
 /// 下载状态
-enum DownloadStatus: String, Codable {
-    case waiting
-    case downloading
-    case paused
-    case completed
-    case failed
-    case cancelled
-}
+// 注意：DownloadStatus已在DownloadView.swift中定义，这里不再重复定义
 
 /// 下载进度信息
 struct DownloadProgress {
@@ -1315,20 +1324,74 @@ struct UnifiedDownloadRequest: Identifiable, Codable {
     var filePath: String?
     var errorMessage: String?
     
+    // 为Date类型提供自定义编码/解码
+    enum CodingKeys: String, CodingKey {
+        case id, bundleIdentifier, name, version, identifier, iconURL, versionId, status, progress
+        case createdAt, completedAt, filePath, errorMessage
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        bundleIdentifier = try container.decode(String.self, forKey: .bundleIdentifier)
+        name = try container.decode(String.self, forKey: .name)
+        version = try container.decode(String.self, forKey: .version)
+        identifier = try container.decode(String.self, forKey: .identifier)
+        iconURL = try container.decodeIfPresent(String.self, forKey: .iconURL)
+        versionId = try container.decodeIfPresent(String.self, forKey: .versionId)
+        status = try container.decode(DownloadStatus.self, forKey: .status)
+        progress = try container.decode(Double.self, forKey: .progress)
+        
+        // 解码Date类型
+        let createdAtString = try container.decode(String.self, forKey: .createdAt)
+        createdAt = ISO8601DateFormatter().date(from: createdAtString) ?? Date()
+        
+        if let completedAtString = try container.decodeIfPresent(String.self, forKey: .completedAt) {
+            completedAt = ISO8601DateFormatter().date(from: completedAtString)
+        }
+        
+        filePath = try container.decodeIfPresent(String.self, forKey: .filePath)
+        errorMessage = try container.decodeIfPresent(String.self, forKey: .errorMessage)
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(bundleIdentifier, forKey: .bundleIdentifier)
+        try container.encode(name, forKey: .name)
+        try container.encode(version, forKey: .version)
+        try container.encode(identifier, forKey: .identifier)
+        try container.encodeIfPresent(iconURL, forKey: .iconURL)
+        try container.encodeIfPresent(versionId, forKey: .versionId)
+        try container.encode(status, forKey: .status)
+        try container.encode(progress, forKey: .progress)
+        
+        // 编码Date类型为ISO8601字符串
+        let dateFormatter = ISO8601DateFormatter()
+        try container.encode(dateFormatter.string(from: createdAt), forKey: .createdAt)
+        
+        if let completedAt = completedAt {
+            try container.encode(dateFormatter.string(from: completedAt), forKey: .completedAt)
+        }
+        
+        try container.encodeIfPresent(filePath, forKey: .filePath)
+        try container.encodeIfPresent(errorMessage, forKey: .errorMessage)
+    }
+    
     var isCompleted: Bool {
-        return status == .completed
+        return status == DownloadStatus.completed
     }
     
     var isFailed: Bool {
-        return status == .failed
+        return status == DownloadStatus.failed
     }
     
     var isDownloading: Bool {
-        return status == .downloading
+        return status == DownloadStatus.downloading
     }
     
     var isPaused: Bool {
-        return status == .paused
+        return status == DownloadStatus.paused
     }
 }
 

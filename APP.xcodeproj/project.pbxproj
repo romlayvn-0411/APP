@@ -49,9 +49,22 @@
 		851FD95F2E578774002136BA /* APP.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = APP.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		85C0ECC12EC13D38005C3059 /* Exceptions for "APP" folder in "APP" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 851FD95E2E578774002136BA /* APP */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		851FD9612E578774002136BA /* APP */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				85C0ECC12EC13D38005C3059 /* Exceptions for "APP" folder in "APP" target */,
+			);
 			path = APP;
 			sourceTree = "<group>";
 		};
@@ -145,7 +158,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1640;
-				LastUpgradeCheck = 2600;
+				LastUpgradeCheck = 2610;
 				TargetAttributes = {
 					851FD95E2E578774002136BA = {
 						CreatedOnToolsVersion = 16.4;
@@ -401,9 +414,8 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/APP/Resources",
 					"$(PROJECT_DIR)/APP",
-					"$(PROJECT_DIR)/APP/ElleKit",
 				);
-				MARKETING_VERSION = 2.4.6;
+				MARKETING_VERSION = 2.4.7;
 				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.pxx917144686.App2025;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -454,9 +466,8 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/APP/Resources",
 					"$(PROJECT_DIR)/APP",
-					"$(PROJECT_DIR)/APP/ElleKit",
 				);
-				MARKETING_VERSION = 2.4.6;
+				MARKETING_VERSION = 2.4.7;
 				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.pxx917144686.App2025;
 				PRODUCT_NAME = "$(TARGET_NAME)";

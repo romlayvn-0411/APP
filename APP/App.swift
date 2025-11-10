@@ -1,102 +1,49 @@
 import SwiftUI
-import OSLog
 import UIKit
 import Combine
+import Network
+import CoreData
 
 @main
-struct FeatherApp: App {
-    private let logger = Logger(subsystem: "com.feather.app", category: "FeatherApp")
+struct App: SwiftUI.App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    @StateObject private var themeManager = ThemeManager.shared
     
-    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    
-    @StateObject var themeManager: ThemeManager
-    @StateObject var appStore: AppStore
-    
-    init() {
-        _themeManager = StateObject(wrappedValue: ThemeManager.shared)
-        _appStore = StateObject(wrappedValue: AppStore.this)
-    }
-
-    func _handleURL(_ url: URL) {
-        logger.info("Handling URL: \(url.absoluteString)")
-        if url.scheme?.hasPrefix("feather") == true {
-            handleFeatherURL(url)
+    var body: some SwiftUI.Scene {
+        WindowGroup {
+            TabbarView()
+                .environmentObject(themeManager)
+                .environmentObject(AppStore.this)
         }
     }
-    
-    private func handleFeatherURL(_ url: URL) {
-        logger.info("Handling Feather URL: \(url.absoluteString)")
-    }
-	
-	var body: some Scene {
-		WindowGroup {
-			TabbarView()
-				.environmentObject(themeManager)
-				.environmentObject(appStore)
-				.onOpenURL(perform: _handleURL)
-				.onAppear {
-					if let style = UIUserInterfaceStyle(rawValue: UserDefaults.standard.integer(forKey: "Feather.userInterfaceStyle")) {
-						UIApplication.topViewController()?.view.window?.overrideUserInterfaceStyle = style
-					}
-					
-					UIApplication.topViewController()?.view.window?.tintColor = UIColor(Color(hex: UserDefaults.standard.string(forKey: "Feather.userTintColor") ?? "#B496DC"))
-				}
-		}
-	}
 }
 
 // MARK: - App Delegate
 class AppDelegate: NSObject, UIApplicationDelegate {
-    private let logger = Logger(subsystem: "com.feather.app", category: "AppDelegate")
+    // 后台会话完成处理器
+    var backgroundSessionCompletionHandler: (() -> Void)?
     
-    func application(
-        _ application: UIApplication,
-        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
-    ) -> Bool {
-        logger.info("Application did finish launching")
-        
-        // 应用启动初始化
-        self.setupLibraryPaths()
-        self.createDocumentsDirectories()
-        
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        // 初始化代码
         return true
     }
+    
+    // 处理后台URL会话事件
+    func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: @escaping () -> Void) {
         
-    private func setupLibraryPaths() {
-        // 库文件路径,有空再完善
-    }
+        // 存储完成处理器，供下载管理器使用
+        self.backgroundSessionCompletionHandler = completionHandler
         
-    private func createDocumentsDirectories() {
-        let fileManager = FileManager.default
-        let documents = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        
-        let directories: [URL] = [
-            documents.appendingPathComponent("Archives", isDirectory: true),
-            documents.appendingPathComponent("Certificates", isDirectory: true),
-            documents.appendingPathComponent("Signed", isDirectory: true),
-            documents.appendingPathComponent("Unsigned", isDirectory: true)
-        ]
-        
-        for url in directories {
-            try? fileManager.createDirectory(at: url, withIntermediateDirectories: true)
-        }
+        // 确保下载管理器被初始化，以便它可以处理后台会话
+        let _ = AppStoreDownloadManager.shared
     }
 }
 
-// MARK: - UIApplication Extension
-public extension UIApplication {
-    class func topViewController(controller: UIViewController? = UIApplication.shared.keyWindow?.rootViewController) -> UIViewController? {
-        if let navigationController = controller as? UINavigationController {
-            return topViewController(controller: navigationController.visibleViewController)
-        }
-        if let tabController = controller as? UITabBarController {
-            if let selected = tabController.selectedViewController {
-                return topViewController(controller: selected)
-            }
-        }
-        if let presented = controller?.presentedViewController {
-            return topViewController(controller: presented)
-        }
-        return controller
+// MARK: - Previews
+struct App_Previews: SwiftUI.PreviewProvider {
+    static var previews: some SwiftUI.View {
+        TabbarView()
+            .environmentObject(ThemeManager.shared)
+            .environmentObject(AppStore.this)
     }
 }
