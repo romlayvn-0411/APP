@@ -40,14 +40,20 @@ enum TabEnum: String, CaseIterable, Hashable {
             SettingsView()
                 .environmentObject(themeManager)
         case .downloads: 
-            DownloadView()
-                .environmentObject(themeManager)
+            NavigationView {
+                DownloadView()
+                    .environmentObject(themeManager)
+            }
         case .tfapps: 
-            TFAppsView()
-                .environmentObject(themeManager)
+            NavigationView {
+                TFAppsView()
+                    .environmentObject(themeManager)
+            }
         case .search:
-            SearchView()
-                .environmentObject(themeManager)
+            NavigationView {
+                SearchView()
+                    .environmentObject(themeManager)
+            }
         }
     }
 }
